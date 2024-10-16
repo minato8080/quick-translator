@@ -7,6 +7,7 @@ import {
   ArrowRightLeft,
   Loader2,
   X,
+  RotateCcw,
   Save,
   Edit,
   Menu,
@@ -16,13 +17,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import {
   DropdownMenu,
@@ -41,6 +35,14 @@ const languages = {
   ja: "Japanese",
 };
 type LanguagesKeys = keyof typeof languages;
+type WordCard = {
+  input: string;
+  output: string;
+  sourceLang: LanguagesKeys;
+  targetLang: LanguagesKeys;
+  saved: boolean;
+  editing: boolean;
+};
 
 /**
  * 擬似的な翻訳関数
@@ -55,18 +57,26 @@ const translateText = async (
   targetLang: string
 ): Promise<string> => {
   await new Promise((resolve) => setTimeout(resolve, 300)); // API遅延をシミュレート
-  return `${targetLang === "ja" ? "翻訳: " : "Translated: "}${text}`;
+  return text;
 };
 
 export default function Translate() {
   const [inputText, setInputText] = useState("");
+  const [preEditText, setPreEditText] = useState<WordCard>({
+    input: "",
+    output: "",
+    sourceLang: "ja",
+    targetLang: "en",
+    saved: false,
+    editing: false,
+  });
   const [translatedText, setTranslatedText] = useState("");
   const [sourceLang, setSourceLang] = useState<LanguagesKeys>("ja");
   const [targetLang, setTargetLang] = useState<LanguagesKeys>("en");
   const [isTranslating, setIsTranslating] = useState(false);
-  const [translationHistory, setTranslationHistory] = useState<
-    Array<{ input: string; output: string; saved: boolean; editing: boolean }>
-  >([]);
+  const [translationHistory, setTranslationHistory] = useState<Array<WordCard>>(
+    []
+  );
   const [activeScreen, setActiveScreen] = useState<
     "translate" | "vocabulary" | "settings"
   >("translate");
@@ -113,7 +123,7 @@ export default function Translate() {
   const handleSwapLanguages = () => {
     setSourceLang(targetLang);
     setTargetLang(sourceLang);
-    setInputText(translatedText.replace(/^(Translated: |翻訳: )/, ""));
+    setInputText(translatedText);
     setTranslatedText("");
   };
 
@@ -137,6 +147,8 @@ export default function Translate() {
         {
           input: inputText,
           output: translatedText,
+          sourceLang: sourceLang,
+          targetLang: targetLang,
           saved: false,
           editing: false,
         },
@@ -192,9 +204,24 @@ export default function Translate() {
    */
   const handleEditTranslation = (index: number) => {
     setTranslationHistory((prev) =>
-      prev.map((item, i) =>
-        i === index ? { ...item, editing: true, saved: false } : item
-      )
+      prev.map((item, i) => {
+        if (i === index) {
+          setPreEditText(item);
+          return { ...item, editing: true, saved: false };
+        } else {
+          return item;
+        }
+      })
+    );
+  };
+
+  /**
+   * 編集をキャンセルする関数
+   * @param index キャンセルする翻訳のインデックス
+   */
+  const handleCancelEdit = (index: number) => {
+    setTranslationHistory((prev) =>
+      prev.map((item, i) => (i === index ? { ...preEditText } : item))
     );
   };
 
@@ -215,27 +242,16 @@ export default function Translate() {
   };
 
   return (
+    // 全体のコンテナを定義
     <div className="min-h-screen bg-blue-50 flex flex-col items-center p-4">
-      <div className="w-full max-w-3xl bg-white rounded-lg shadow-xl overflow-hidden">
+      {/* メインのカードコンテナ */}
+      <div className="w-full max-w-3xl bg-white rounded-lg shadow-xl overflow-hidden fixed">
+        {/* ヘッダー部分 */}
         <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
+          {/* アプリケーションのタイトル */}
           <h1 className="text-2xl font-bold">Quick Translator</h1>
           <div className="flex items-center space-x-2">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Avatar className="h-8 w-8 cursor-pointer">
-                    <AvatarImage
-                      src="https://github.com/shadcn.png"
-                      alt="User"
-                    />
-                    <AvatarFallback>CN</AvatarFallback>
-                  </Avatar>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Your Profile</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            {/* ドロップダウンメニュー */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -248,14 +264,17 @@ export default function Translate() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                {/* 翻訳画面への切り替え */}
                 <DropdownMenuItem onClick={() => setActiveScreen("translate")}>
                   <ArrowRightLeft className="mr-2 h-4 w-4" />
                   <span>Translate</span>
                 </DropdownMenuItem>
+                {/* ボキャブラリー画面への切り替え */}
                 <DropdownMenuItem onClick={() => setActiveScreen("vocabulary")}>
                   <Book className="mr-2 h-4 w-4" />
                   <span>Vocabulary</span>
                 </DropdownMenuItem>
+                {/* 設定画面への切り替え */}
                 <DropdownMenuItem onClick={() => setActiveScreen("settings")}>
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Settings</span>
@@ -265,52 +284,9 @@ export default function Translate() {
           </div>
         </div>
 
-        <div className="p-4">
-          <Card className="mb-4">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-medium text-gray-700">
-                  {languages[sourceLang]}
-                </span>
-                <Button variant="ghost" size="sm" onClick={handleSwapLanguages}>
-                  <ArrowRightLeft className="h-4 w-4" />
-                  <span className="sr-only">Swap languages</span>
-                </Button>
-                <span className="font-medium text-gray-700">
-                  {languages[targetLang]}
-                </span>
-              </div>
-              <textarea
-                className="w-full p-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none mb-2"
-                placeholder="Enter text to translate..."
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                onKeyDown={handleKeyDown}
-                rows={4}
-                aria-label="Input text for translation"
-              />
-              <div className="relative">
-                <Label className="w-full p-2 rounded-md border border-gray-300 bg-gray-50 block mb-2 min-h-[96px]">
-                  {translatedText.replace(/^(Translated: |翻訳: )/, "")}
-                </Label>
-                {isTranslating && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-50 rounded-md">
-                    <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-                  </div>
-                )}
-              </div>
-              <div className="flex justify-end mt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleAddToHistory}
-                >
-                  Submit
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
+        {/* メインコンテンツ部分 */}
+        <div className="p-4 overflow-y-auto" style={{ maxHeight: "370px" }}>
+          {/* 翻訳履歴の表示 */}
           <AnimatePresence>
             {translationHistory.map((item, index) => (
               <motion.div
@@ -320,21 +296,21 @@ export default function Translate() {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
               >
+                {/* 各翻訳履歴のカード */}
                 <Card className="mb-2 hover:shadow-md transition-shadow">
                   <CardContent className="p-3">
                     <div className="flex justify-between items-start mb-1">
+                      {/* 翻訳元の言語表示 */}
                       <span className="text-sm font-medium text-gray-500">
-                        {languages[sourceLang]}
+                        {languages[item.sourceLang]}
                       </span>
                       <div className="flex space-x-1">
+                        {/* 翻訳の保存ボタン */}
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() =>
-                            item.editing
-                              ? handleSaveTranslation(index)
-                              : handleEditTranslation(index)
-                          }
+                          onClick={() => handleSaveTranslation(index)}
+                          disabled={item.saved}
                         >
                           {item.editing ? (
                             <Save className="h-4 w-4 text-blue-600" />
@@ -351,6 +327,7 @@ export default function Translate() {
                               : "Save translation"}
                           </span>
                         </Button>
+                        {/* 編集モードへの切り替えボタン */}
                         {!item.editing && (
                           <Button
                             variant="ghost"
@@ -361,17 +338,30 @@ export default function Translate() {
                             <span className="sr-only">Edit translation</span>
                           </Button>
                         )}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteTranslation(index)}
-                        >
-                          <X className="h-4 w-4 text-red-600" />
-                          <span className="sr-only">Delete translation</span>
-                        </Button>
+                        {/* 翻訳の削除ボタン */}
+                        {item.editing ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleCancelEdit(index)}
+                          >
+                            <RotateCcw className="h-4 w-4 text-red-600" />
+                            <span className="sr-only">Cancel edit</span>
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteTranslation(index)}
+                          >
+                            <X className="h-4 w-4 text-red-600" />
+                            <span className="sr-only">Delete translation</span>
+                          </Button>
+                        )}
                       </div>
                     </div>
                     <div className="flex justify-between items-center mb-2">
+                      {/* 翻訳元テキストの表示または編集 */}
                       {item.editing ? (
                         <Input
                           value={item.input}
@@ -382,11 +372,12 @@ export default function Translate() {
                               e.target.value
                             )
                           }
-                          className="flex-grow mr-2"
+                          className="flex-grow mr-2 text-md"
                         />
                       ) : (
-                        <p className="text-gray-800">{item.input}</p>
+                        <p className="text-gray-800 p-2">{item.input}</p>
                       )}
+                      {/* 翻訳元テキストの音声再生ボタン */}
                       <Button
                         variant="ghost"
                         size="sm"
@@ -399,17 +390,16 @@ export default function Translate() {
                       </Button>
                     </div>
                     <div className="flex justify-between items-start mb-1">
+                      {/* 翻訳先の言語表示 */}
                       <span className="text-sm font-medium text-gray-500">
-                        {languages[targetLang]}
+                        {languages[item.targetLang]}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
+                      {/* 翻訳先テキストの表示または編集 */}
                       {item.editing ? (
                         <Input
-                          value={item.output.replace(
-                            /^(Translated: |翻訳: )/,
-                            ""
-                          )}
+                          value={item.output}
                           onChange={(e) =>
                             handleUpdateTranslation(
                               index,
@@ -417,21 +407,17 @@ export default function Translate() {
                               e.target.value
                             )
                           }
-                          className="flex-grow mr-2"
+                          className="flex-grow mr-2 text-md"
                         />
                       ) : (
-                        <p className="text-gray-800">
-                          {item.output.replace(/^(Translated: |翻訳: )/, "")}
-                        </p>
+                        <p className="text-gray-800 p-2">{item.output}</p>
                       )}
+                      {/* 翻訳先テキストの音声再生ボタン */}
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() =>
-                          handleTextToSpeech(
-                            item.output.replace(/^(Translated: |翻訳: )/, ""),
-                            targetLang
-                          )
+                          handleTextToSpeech(item.output, targetLang)
                         }
                       >
                         <Volume2 className="h-4 w-4 text-blue-600" />
@@ -447,6 +433,54 @@ export default function Translate() {
           </AnimatePresence>
         </div>
       </div>
+      {/* 入力部分 */}
+      <Card className="mb-4 fixed bottom-0 w-full max-w-3xl">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between mb-2">
+            {/* 翻訳元の言語表示 */}
+            <span className="font-medium text-gray-700">
+              {languages[sourceLang]}
+            </span>
+            {/* 言語の入れ替えボタン */}
+            <Button variant="ghost" size="sm" onClick={handleSwapLanguages}>
+              <ArrowRightLeft className="h-4 w-4" />
+              <span className="sr-only">Swap languages</span>
+            </Button>
+            {/* 翻訳先の言語表示 */}
+            <span className="font-medium text-gray-700">
+              {languages[targetLang]}
+            </span>
+          </div>
+          {/* 翻訳するテキストを入力するテキストエリア */}
+          <textarea
+            className="w-full p-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none mb-2"
+            placeholder="Enter text to translate..."
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            onKeyDown={handleKeyDown}
+            rows={2}
+            aria-label="Input text for translation"
+          />
+          <div className="relative">
+            {/* 翻訳結果の表示 */}
+            <Label className="w-full p-2 rounded-md border border-gray-300 bg-gray-50 block mb-2 min-h-[64px] text-md">
+              {translatedText}
+            </Label>
+            {/* 翻訳中のローディングインジケーター */}
+            {isTranslating && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-50 rounded-md">
+                <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+              </div>
+            )}
+          </div>
+          <div className="flex justify-end mt-2">
+            {/* 翻訳履歴に追加するボタン */}
+            <Button variant="outline" size="sm" onClick={handleAddToHistory}>
+              Submit
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
