@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 
+import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRightLeft,
@@ -33,22 +34,6 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { languages } from "@/types/types";
 
-/**
- * 擬似的な翻訳関数
- * @param text 翻訳するテキスト
- * @param _sourceLang ソース言語
- * @param _targetLang ターゲット言語
- * @returns 翻訳されたテキスト
- */
-const translateText = async (
-  text: string,
-  _sourceLang: string,
-  _targetLang: string
-): Promise<string> => {
-  await new Promise((resolve) => setTimeout(resolve, 300)); // API遅延をシミュレート
-  return text;
-};
-
 export default function Translate() {
   const [inputText, setInputText] = useState("");
   const [preEditText, setPreEditText] = useState<WordCard>({
@@ -71,6 +56,37 @@ export default function Translate() {
     "translate" | "vocabulary" | "settings"
   >("translate");
   const { toast } = useToast();
+
+  /**
+   * 翻訳関数
+   * @param text 翻訳するテキスト
+   * @param sourceLang ソース言語
+   * @param targetLang ターゲット言語
+   * @returns 翻訳されたテキスト
+   */
+  const translateText = async (
+    text: string,
+    sourceLang: string,
+    targetLang: string
+  ): Promise<string> => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_GOOGLE_TRANSLATE_API;
+      if (!apiUrl) {
+        throw new Error("Google Translate API URL is not defined.");
+      }
+      const response = await axios.get(apiUrl, {
+        params: {
+          text,
+          source: sourceLang,
+          target: targetLang,
+        },
+      });
+      return response.data.translatedText;
+    } catch (error) {
+      console.error("Failed to call the translation API:", error);
+      throw new Error("Translation failed.");
+    }
+  };
 
   /**
    * 翻訳を実行する関数
