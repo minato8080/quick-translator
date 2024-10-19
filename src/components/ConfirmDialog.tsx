@@ -1,4 +1,8 @@
-import { cloneElement, Children, RefAttributes } from "react";
+import type { RefAttributes } from "react";
+import { cloneElement } from "react";
+
+import type { ButtonProps } from "./ui/button";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,7 +14,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { ButtonProps } from "./ui/button";
 
 /**
  * ConfirmDialogコンポーネント
