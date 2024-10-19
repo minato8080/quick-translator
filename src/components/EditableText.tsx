@@ -1,3 +1,5 @@
+"use client";
+
 import type { SetStateAction } from "react";
 
 import { Volume2 } from "lucide-react";
@@ -7,6 +9,19 @@ import type { WordCard } from "@/types/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+/**
+ * EditableTextコンポーネント
+ *
+ * このコンポーネントは、翻訳テキストを表示または編集するためのUIを提供します。
+ *
+ * @param io - テキストの種類（"input"または"output"）
+ * @param item - 表示または編集するWordCardオブジェクト
+ * @param index - WordCardのインデックス
+ * @param lang - 言語コード
+ * @param setTranslationHistory - 翻訳履歴を更新するための関数
+ *
+ * @returns 翻訳テキストの表示または編集UI
+ */
 export const EditableText = ({
   io,
   item,

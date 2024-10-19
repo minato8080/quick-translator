@@ -1,4 +1,4 @@
-import Translate from "@/components/Translate";
+import Translate from "@/pages/translate";
 
 export default function Home() {
   return <Translate />;
