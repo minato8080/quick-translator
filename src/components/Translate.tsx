@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Volume2,
   ArrowRightLeft,
   Loader2,
   X,
@@ -15,9 +15,14 @@ import {
   Settings,
   Check,
 } from "lucide-react";
+
+import { ConfirmDialog } from "./ConfirmDialog";
+import { EditableText } from "./EditableText";
+
+import type { LanguagesKeys, WordCard } from "@/types/types";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,38 +30,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { ConfirmDialog } from "./ConfirmDialog";
-
-/**
- * 使用可能な言語のリスト
- */
-const languages = {
-  en: "English",
-  ja: "Japanese",
-};
-type LanguagesKeys = keyof typeof languages;
-type WordCard = {
-  input: string;
-  output: string;
-  sourceLang: LanguagesKeys;
-  targetLang: LanguagesKeys;
-  saved: boolean;
-  editing: boolean;
-  timestamp: string;
-};
+import { useToast } from "@/hooks/use-toast";
+import { languages } from "@/types/types";
 
 /**
  * 擬似的な翻訳関数
  * @param text 翻訳するテキスト
- * @param sourceLang ソース言語
- * @param targetLang ターゲット言語
+ * @param _sourceLang ソース言語
+ * @param _targetLang ターゲット言語
  * @returns 翻訳されたテキスト
  */
 const translateText = async (
   text: string,
-  sourceLang: string,
-  targetLang: string
+  _sourceLang: string,
+  _targetLang: string
 ): Promise<string> => {
   await new Promise((resolve) => setTimeout(resolve, 300)); // API遅延をシミュレート
   return text;
@@ -80,7 +67,7 @@ export default function Translate() {
   const [translationHistory, setTranslationHistory] = useState<Array<WordCard>>(
     []
   );
-  const [activeScreen, setActiveScreen] = useState<
+  const [_activeScreen, setActiveScreen] = useState<
     "translate" | "vocabulary" | "settings"
   >("translate");
   const { toast } = useToast();
@@ -94,7 +81,7 @@ export default function Translate() {
       try {
         const result = await translateText(inputText, sourceLang, targetLang);
         setTranslatedText(result);
-      } catch (error) {
+      } catch {
         toast({
           title: "Translation Error",
           description:
@@ -128,17 +115,6 @@ export default function Translate() {
     setTargetLang(sourceLang);
     setInputText(translatedText);
     setTranslatedText("");
-  };
-
-  /**
-   * テキストを音声で読み上げる関数
-   * @param text 読み上げるテキスト
-   * @param lang 言語コード
-   */
-  const handleTextToSpeech = (text: string, lang: string) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang === "ja" ? "ja-JP" : "en-US";
-    window.speechSynthesis.speak(utterance);
   };
 
   /**
@@ -226,22 +202,6 @@ export default function Translate() {
   const handleCancelEdit = (index: number) => {
     setTranslationHistory((prev) =>
       prev.map((item, i) => (i === index ? { ...preEditText } : item))
-    );
-  };
-
-  /**
-   * 翻訳を更新する関数
-   * @param index 更新する翻訳のインデックス
-   * @param field 更新するフィールド（inputまたはoutput）
-   * @param value 更新する値
-   */
-  const handleUpdateTranslation = (
-    index: number,
-    field: "input" | "output",
-    value: string
-  ) => {
-    setTranslationHistory((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, [field]: value } : item))
     );
   };
 
@@ -369,72 +329,28 @@ export default function Translate() {
                         </ConfirmDialog>
                       </div>
                     </div>
-                    <div className="flex justify-between items-center mb-2">
-                      {/* 翻訳元テキストの表示または編集 */}
-                      {item.editing ? (
-                        <Input
-                          value={item.input}
-                          onChange={(e) =>
-                            handleUpdateTranslation(
-                              index,
-                              "input",
-                              e.target.value
-                            )
-                          }
-                          className="flex-grow mr-2 text-md"
-                        />
-                      ) : (
-                        <p className="text-gray-800 p-2">{item.input}</p>
-                      )}
-                      {/* 翻訳元テキストの音声再生ボタン */}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() =>
-                          handleTextToSpeech(item.input, sourceLang)
-                        }
-                      >
-                        <Volume2 className="h-4 w-4 text-blue-600" />
-                        <span className="sr-only">Listen to source text</span>
-                      </Button>
-                    </div>
+                    {/* 翻訳元テキストの表示または編集 */}
+                    <EditableText
+                      io="input"
+                      item={item}
+                      index={index}
+                      lang={item.sourceLang}
+                      setTranslationHistory={setTranslationHistory}
+                    />
                     <div className="flex justify-between items-start mb-1">
                       {/* 翻訳先の言語表示 */}
                       <span className="text-sm font-medium text-gray-500">
                         {languages[item.targetLang]}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      {/* 翻訳先テキストの表示または編集 */}
-                      {item.editing ? (
-                        <Input
-                          value={item.output}
-                          onChange={(e) =>
-                            handleUpdateTranslation(
-                              index,
-                              "output",
-                              e.target.value
-                            )
-                          }
-                          className="flex-grow mr-2 text-md"
-                        />
-                      ) : (
-                        <p className="text-gray-800 p-2">{item.output}</p>
-                      )}
-                      {/* 翻訳先テキストの音声再生ボタン */}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() =>
-                          handleTextToSpeech(item.output, targetLang)
-                        }
-                      >
-                        <Volume2 className="h-4 w-4 text-blue-600" />
-                        <span className="sr-only">
-                          Listen to translated text
-                        </span>
-                      </Button>
-                    </div>
+                    {/* 翻訳先テキストの表示または編集 */}
+                    <EditableText
+                      io="output"
+                      item={item}
+                      index={index}
+                      lang={item.targetLang}
+                      setTranslationHistory={setTranslationHistory}
+                    />
                   </CardContent>
                 </Card>
               </motion.div>
