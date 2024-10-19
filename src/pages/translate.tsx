@@ -17,8 +17,8 @@ import {
   Check,
 } from "lucide-react";
 
-import { ConfirmDialog } from "./ConfirmDialog";
-import { EditableText } from "./EditableText";
+import { ConfirmDialog } from "../components/ConfirmDialog";
+import { EditableText } from "../components/EditableText";
 
 import type { LanguagesKeys, WordCard } from "@/types/types";
 
