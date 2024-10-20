@@ -86,7 +86,7 @@ export default function Translate() {
       return response.data.translatedText;
     } catch (error) {
       console.error("Failed to call the translation API:", error);
-      showAlert("error", "Error", "Failed to call the translation API");
+      showAlert("error", "Error", "Failed to call the translation API.");
       return "";
     }
   };
