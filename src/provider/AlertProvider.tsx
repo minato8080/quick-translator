@@ -114,7 +114,7 @@ export const AlertProvider: React.FC<{ children: ReactNode }> = ({
   );
 
   return (
-    <AlertContext.Provider value={{ alert, showAlert }}>
+    <AlertContext.Provider value={{ alert:alert, showAlert:showAlert }}>
       {children}
       <AlertPopup />
     </AlertContext.Provider>

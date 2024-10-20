@@ -1,6 +1,6 @@
 import { useContext } from "react";
 
-import { AlertContext } from "@/provider/AlertProvier";
+import { AlertContext } from "@/provider/AlertProvider";
 
 /**
  * アラートポップアップを使用するためのカスタムフック
