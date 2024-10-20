@@ -1,6 +1,9 @@
 import localFont from "next/font/local";
 
 import type { Metadata } from "next";
+
+import { Toaster } from "@/components/ui/toaster";
+import { AlertProvider } from "@/provider/AlertProvider";
 import "./globals.css";
 
 const geistSans = localFont({
@@ -18,6 +21,7 @@ export const metadata: Metadata = {
   title: "Quick Translator",
   description: "A simple web text translator Japanese-English",
 };
+// Start of Selection
 
 export default function RootLayout({
   children,
@@ -27,9 +31,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        // className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <main>
+          <AlertProvider>
+            {children}
+            <Toaster />
+          </AlertProvider>
+        </main>
       </body>
     </html>
   );

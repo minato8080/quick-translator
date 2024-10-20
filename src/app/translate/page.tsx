@@ -15,9 +15,10 @@ import {
   Book,
   Check,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-import { ConfirmDialog } from "../components/ConfirmDialog";
-import { EditableText } from "../components/EditableText";
+import { ConfirmDialog } from "../../components/ConfirmDialog";
+import { EditableText } from "../../components/EditableText";
 
 import type { LanguagesKeys, WordCard } from "@/types/types";
 
@@ -57,6 +58,7 @@ export default function Translate() {
   );
   const { toast } = useToast();
   const { showAlert } = useAlertPopup();
+  const router = useRouter();
 
   /**
    * 翻訳関数
@@ -254,7 +256,7 @@ export default function Translate() {
                   <span>Translate</span>
                 </DropdownMenuItem>
                 {/* ボキャブラリー画面への切り替え */}
-                <DropdownMenuItem onClick={() => setActiveScreen("vocabulary")}>
+                <DropdownMenuItem onClick={() => router.push("/vocabulary")}>
                   <Book className="mr-2 h-4 w-4" />
                   <span>Vocabulary</span>
                 </DropdownMenuItem>
