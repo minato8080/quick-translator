@@ -13,7 +13,6 @@ import {
   Edit,
   Menu,
   Book,
-  Settings,
   Check,
 } from "lucide-react";
 
@@ -22,7 +21,6 @@ import { EditableText } from "../components/EditableText";
 
 import type { LanguagesKeys, WordCard } from "@/types/types";
 
-import { AlertPopup } from "@/components/AlertPopup";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -54,11 +52,11 @@ export default function Translate() {
   const [translationHistory, setTranslationHistory] = useState<Array<WordCard>>(
     []
   );
-  const [_activeScreen, setActiveScreen] = useState<
-    "translate" | "vocabulary" | "settings"
-  >("translate");
+  const [_activeScreen, setActiveScreen] = useState<"translate" | "vocabulary">(
+    "translate"
+  );
   const { toast } = useToast();
-  const { alert, showAlert } = useAlertPopup();
+  const { showAlert } = useAlertPopup();
 
   /**
    * 翻訳関数
@@ -260,11 +258,6 @@ export default function Translate() {
                   <Book className="mr-2 h-4 w-4" />
                   <span>Vocabulary</span>
                 </DropdownMenuItem>
-                {/* 設定画面への切り替え */}
-                <DropdownMenuItem onClick={() => setActiveScreen("settings")}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -457,7 +450,7 @@ export default function Translate() {
           </div>
         </CardContent>
       </Card>
-      <AlertPopup alert={alert} />
+      {/* <AlertPopup alert={alert} /> */}
     </div>
   );
 }
