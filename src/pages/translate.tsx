@@ -22,6 +22,7 @@ import { EditableText } from "../components/EditableText";
 
 import type { LanguagesKeys, WordCard } from "@/types/types";
 
+import { AlertPopup } from "@/components/AlertPopup";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -32,6 +33,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useAlertPopup } from "@/hooks/useAlertPopup";
 import { languages } from "@/types/types";
 
 export default function Translate() {
@@ -56,6 +58,7 @@ export default function Translate() {
     "translate" | "vocabulary" | "settings"
   >("translate");
   const { toast } = useToast();
+  const { alert, showAlert } = useAlertPopup();
 
   /**
    * 翻訳関数
@@ -70,6 +73,7 @@ export default function Translate() {
     targetLang: string
   ): Promise<string> => {
     try {
+      // if (1) return "test"; //TODO
       const apiUrl = process.env.NEXT_PUBLIC_GOOGLE_TRANSLATE_API;
       if (!apiUrl) {
         throw new Error("Google Translate API URL is not defined.");
@@ -84,7 +88,8 @@ export default function Translate() {
       return response.data.translatedText;
     } catch (error) {
       console.error("Failed to call the translation API:", error);
-      throw new Error("Translation failed.");
+      showAlert("error", "Error", "Failed to call the translation API");
+      return "";
     }
   };
 
@@ -110,6 +115,7 @@ export default function Translate() {
     } else {
       setTranslatedText("");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputText, sourceLang, targetLang, toast]);
 
   /**
@@ -451,6 +457,7 @@ export default function Translate() {
           </div>
         </CardContent>
       </Card>
+      <AlertPopup alert={alert} />
     </div>
   );
 }
