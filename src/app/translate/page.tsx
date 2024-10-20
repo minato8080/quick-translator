@@ -13,12 +13,12 @@ import {
   Edit,
   Menu,
   Book,
-  Settings,
   Check,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-import { ConfirmDialog } from "../components/ConfirmDialog";
-import { EditableText } from "../components/EditableText";
+import { ConfirmDialog } from "../../components/ConfirmDialog";
+import { EditableText } from "../../components/EditableText";
 
 import type { LanguagesKeys, WordCard } from "@/types/types";
 
@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useAlertPopup } from "@/hooks/useAlertPopup";
 import { languages } from "@/types/types";
 
 export default function Translate() {
@@ -52,10 +53,12 @@ export default function Translate() {
   const [translationHistory, setTranslationHistory] = useState<Array<WordCard>>(
     []
   );
-  const [_activeScreen, setActiveScreen] = useState<
-    "translate" | "vocabulary" | "settings"
-  >("translate");
+  const [_activeScreen, setActiveScreen] = useState<"translate" | "vocabulary">(
+    "translate"
+  );
   const { toast } = useToast();
+  const { showAlert } = useAlertPopup();
+  const router = useRouter();
 
   /**
    * 翻訳関数
@@ -70,6 +73,7 @@ export default function Translate() {
     targetLang: string
   ): Promise<string> => {
     try {
+      // if (1) return "test"; //TODO
       const apiUrl = process.env.NEXT_PUBLIC_GOOGLE_TRANSLATE_API;
       if (!apiUrl) {
         throw new Error("Google Translate API URL is not defined.");
@@ -84,7 +88,8 @@ export default function Translate() {
       return response.data.translatedText;
     } catch (error) {
       console.error("Failed to call the translation API:", error);
-      throw new Error("Translation failed.");
+      showAlert("error", "Error", "Failed to call the translation API.");
+      return "";
     }
   };
 
@@ -110,6 +115,7 @@ export default function Translate() {
     } else {
       setTranslatedText("");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputText, sourceLang, targetLang, toast]);
 
   /**
@@ -250,14 +256,9 @@ export default function Translate() {
                   <span>Translate</span>
                 </DropdownMenuItem>
                 {/* ボキャブラリー画面への切り替え */}
-                <DropdownMenuItem onClick={() => setActiveScreen("vocabulary")}>
+                <DropdownMenuItem onClick={() => router.push("/vocabulary")}>
                   <Book className="mr-2 h-4 w-4" />
                   <span>Vocabulary</span>
-                </DropdownMenuItem>
-                {/* 設定画面への切り替え */}
-                <DropdownMenuItem onClick={() => setActiveScreen("settings")}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -451,6 +452,7 @@ export default function Translate() {
           </div>
         </CardContent>
       </Card>
+      {/* <AlertPopup alert={alert} /> */}
     </div>
   );
 }

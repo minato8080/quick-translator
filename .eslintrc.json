@@ -49,5 +49,6 @@
         "ignoreRestSiblings": true
       }
     ]
-  }
+  },
+  "ignores": ["src/components/ui/*","src/hooks/use-toast.ts"]
 }
