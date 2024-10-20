@@ -80,7 +80,7 @@ export const EditableText = ({
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => handleTextToSpeech(item.input, lang)}
+        onClick={() => handleTextToSpeech(item[io], lang)}
       >
         <Volume2 className="h-4 w-4 text-blue-600" />
         <span className="sr-only">Listen to source text</span>
