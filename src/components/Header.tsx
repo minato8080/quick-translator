@@ -6,7 +6,6 @@ import {
   Book,
 } from "lucide-react";
 
-
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -28,22 +27,28 @@ export const Header = () => {
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              size="icon"
-              className="text-white hover:bg-blue-700"
+              size="lg"
+              className="text-white hover:bg-blue-700 p-3 transition-all duration-200 ease-in-out"
             >
-              <Menu className="h-5 w-5" />
+              <Menu size={24} />
               <span className="sr-only">Menu</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {/* 翻訳画面への切り替え */}
-            <DropdownMenuItem onClick={() => router.push("/translate")}>
-              <ArrowRightLeft className="mr-2 h-4 w-4" />
+            <DropdownMenuItem 
+              onClick={() => router.push("/translate")}
+              className="text-lg py-3 px-4 hover:bg-gray-300"
+            >
+              <ArrowRightLeft className="mr-3 h-6 w-6" />
               <span>Translate</span>
             </DropdownMenuItem>
             {/* ボキャブラリー画面への切り替え */}
-            <DropdownMenuItem onClick={() => router.push("/vocabulary")}>
-              <Book className="mr-2 h-4 w-4" />
+            <DropdownMenuItem 
+              onClick={() => router.push("/vocabulary")}
+              className="text-lg py-3 px-4 hover:bg-gray-300"
+            >
+              <Book className="mr-3 h-6 w-6" />
               <span>Vocabulary</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
