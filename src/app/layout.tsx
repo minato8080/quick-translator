@@ -21,7 +21,6 @@ export const metadata: Metadata = {
   title: "Quick Translator",
   description: "A simple web text translator Japanese-English",
 };
-// Start of Selection
 
 export default function RootLayout({
   children,
@@ -31,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        // className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <main>
           <AlertProvider>

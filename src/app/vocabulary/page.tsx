@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { languages } from "@/types/types";
+import { Header } from "@/components/Header";
 
 export default function Translate() {
   const [preEditText, setPreEditText] = useState<WordCard>({
@@ -49,7 +50,7 @@ export default function Translate() {
     "translate" | "vocabulary" | "settings"
   >("translate");
   const { toast } = useToast();
-  const router = useRouter()
+  const router = useRouter();
 
   /**
    * 翻訳を保存する関数
@@ -107,47 +108,11 @@ export default function Translate() {
   };
 
   return (
-    // 全体のコンテナを定義
     <div className="min-h-screen bg-blue-50 flex flex-col items-center p-4">
       {/* メインのカードコンテナ */}
       <div className="w-full max-w-3xl bg-white rounded-lg shadow-xl overflow-hidden fixed">
         {/* ヘッダー部分 */}
-        <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
-          {/* アプリケーションのタイトル */}
-          <h1 className="text-2xl font-bold">Quick Translator</h1>
-          <div className="flex items-center space-x-2">
-            {/* ドロップダウンメニュー */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-white hover:bg-blue-700"
-                >
-                  <Menu className="h-5 w-5" />
-                  <span className="sr-only">Menu</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {/* 翻訳画面への切り替え */}
-                <DropdownMenuItem onClick={() => router.push("translate")}>
-                  <ArrowRightLeft className="mr-2 h-4 w-4" />
-                  <span>Translate</span>
-                </DropdownMenuItem>
-                {/* ボキャブラリー画面への切り替え */}
-                <DropdownMenuItem onClick={() => setActiveScreen("vocabulary")}>
-                  <Book className="mr-2 h-4 w-4" />
-                  <span>Vocabulary</span>
-                </DropdownMenuItem>
-                {/* 設定画面への切り替え */}
-                <DropdownMenuItem onClick={() => setActiveScreen("settings")}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
+        <Header />
 
         {/* メインコンテンツ部分 */}
         <div

@@ -1,4 +1,9 @@
-import Translate from "@/app/translate/page";
+"use client";
+
+import { useRouter } from "next/navigation";
+
 export default function Home() {
-  return <Translate />;
+  const router = useRouter();
+  router.push("/translate");
+  return <></>;
 }
