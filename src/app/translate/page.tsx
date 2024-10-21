@@ -22,8 +22,8 @@ import { useFlashcardHandler } from "@/hooks/useFlashcardHandler";
 export default function Translate() {
   const [inputText, setInputText] = useState("");
   const [translatedText, setTranslatedText] = useState("");
-  const [sourceLang, setSourceLang] = useState<LanguagesKeys>("ja");
-  const [targetLang, setTargetLang] = useState<LanguagesKeys>("en");
+  const [sourceLang, setSourceLang] = useState<LanguagesKeys>("en");
+  const [targetLang, setTargetLang] = useState<LanguagesKeys>("ja");
   const [isTranslating, setIsTranslating] = useState(false);
   const { toast } = useToast();
   const { showAlert } = useAlertPopup();
