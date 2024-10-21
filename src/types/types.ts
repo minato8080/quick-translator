@@ -17,3 +17,11 @@ export type WordCard = {
   editing: boolean;
   timestamp: string;
 };
+
+/**
+ * Google Translate APIのレスポンス型
+ */
+export type GoogleTranslateAPIResponse = {
+  code: "200" | "400";
+  text: string;
+};

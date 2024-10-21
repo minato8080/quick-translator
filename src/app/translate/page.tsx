@@ -20,7 +20,11 @@ import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { EditableText } from "../../components/EditableText";
 
-import type { LanguagesKeys, WordCard } from "@/types/types";
+import type {
+  GoogleTranslateAPIResponse,
+  LanguagesKeys,
+  WordCard,
+} from "@/types/types";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -59,7 +63,6 @@ export default function Translate() {
   );
   const { toast } = useToast();
   const { showAlert } = useAlertPopup();
-  const router = useRouter();
 
   /**
    * 翻訳関数
@@ -78,19 +81,23 @@ export default function Translate() {
       if (!apiUrl) {
         throw new Error("Google Translate API URL is not defined.");
       }
-      const response = await axios.get(apiUrl, {
-        params: {
-          text,
-          source: sourceLang,
-          target: targetLang,
-        },
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      });
-      console.log(response);
-      return response.data.text;
+      const response: GoogleTranslateAPIResponse = (
+        await axios.get(apiUrl, {
+          params: {
+            text,
+            source: sourceLang,
+            target: targetLang,
+          },
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        })
+      ).data;
+      if (response.code !== "200") {
+        throw new Error(response.text);
+      }
+      return response.text;
     } catch (error) {
       console.error("Failed to call the translation API:", error);
       showAlert("error", "Error", "Failed to call the translation API.");
