@@ -4,7 +4,7 @@ import type { SetStateAction } from "react";
 
 import { Volume2 } from "lucide-react";
 
-import type { WordCard } from "@/types/types";
+import type { FlashcardType } from "@/types/types";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
  * @param item - 表示または編集するWordCardオブジェクト
  * @param index - WordCardのインデックス
  * @param lang - 言語コード
- * @param setTranslationHistory - 翻訳履歴を更新するための関数
+ * @param setFlashcards - 翻訳履歴を更新するための関数
  *
  * @returns 翻訳テキストの表示または編集UI
  */
@@ -27,13 +27,13 @@ export const EditableText = ({
   item,
   index,
   lang,
-  setTranslationHistory,
+  setFlashcards,
 }: {
   io: "input" | "output";
-  item: WordCard;
+  item: FlashcardType;
   index: number;
   lang: string;
-  setTranslationHistory: (value: SetStateAction<WordCard[]>) => void;
+  setFlashcards: (value: SetStateAction<FlashcardType[]>) => void;
 }) => {
   /**
    * 翻訳を更新する関数
@@ -46,7 +46,7 @@ export const EditableText = ({
     field: "input" | "output",
     value: string
   ) => {
-    setTranslationHistory((prev) =>
+    setFlashcards((prev) =>
       prev.map((item, i) => (i === index ? { ...item, [field]: value } : item))
     );
   };

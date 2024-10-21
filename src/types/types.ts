@@ -8,7 +8,7 @@ export const languages = {
 
 export type LanguagesKeys = keyof typeof languages;
 
-export type WordCard = {
+export type FlashcardType = {
   input: string;
   output: string;
   sourceLang: LanguagesKeys;
