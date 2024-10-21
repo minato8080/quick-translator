@@ -230,201 +230,196 @@ export default function Translate() {
 
   return (
     <div className="min-h-screen bg-blue-50 flex flex-col items-center p-4">
-      // 全体のコンテナを定義
-      <div className="min-h-screen bg-blue-50 flex flex-col items-center p-4">
-        {/* メインのカードコンテナ */}
-        <div className="w-full max-w-3xl bg-white rounded-lg shadow-xl overflow-hidden fixed">
-          <Header />
-          {/* メインコンテンツ部分 */}
-          <div
-            className="p-4 overflow-y-auto"
-            style={{ height: "calc(100vh - 250px - 68px - 25px)" }}
-          >
-            {/* 翻訳履歴の表示 */}
-            <AnimatePresence>
-              {translationHistory.map((item, index) => (
-                <motion.div
-                  key={item.timestamp}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {/* 各翻訳履歴のカード */}
-                  <Card className="mb-2 hover:shadow-md transition-shadow">
-                    <CardContent className="p-3">
-                      <div className="flex justify-between items-start mb-1">
-                        {/* 翻訳元の言語表示 */}
-                        <span className="text-sm font-medium text-gray-500">
-                          {languages[item.sourceLang]}
-                        </span>
-                        <div className="flex space-x-1">
-                          {/* 翻訳の保存ボタン */}
-                          <ConfirmDialog title="Save to vocabulary?" ok="Save">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleSaveTranslation(index)}
-                              disabled={item.saved}
-                            >
-                              {item.editing ? (
-                                <Save className="h-4 w-4 text-blue-600" />
-                              ) : item.saved ? (
-                                <Check className="h-4 w-4 text-green-600" />
-                              ) : (
-                                <Save className="h-4 w-4 text-blue-600" />
-                              )}
-                              <span className="sr-only">
-                                {item.editing
-                                  ? "Save changes"
-                                  : item.saved
-                                  ? "Saved"
-                                  : "Save translation"}
-                              </span>
-                            </Button>
-                          </ConfirmDialog>
-                          {/* 編集ボタン */}
-                          {!item.editing ? (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEditTranslation(index)}
-                            >
-                              <Edit className="h-4 w-4 text-green-600" />
-                              <span className="sr-only">Edit translation</span>
-                            </Button>
-                          ) : (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleCancelEdit(index)}
-                            >
-                              <RotateCcw className="h-4 w-4 text-green-600" />
-                              <span className="sr-only">Cancel edit</span>
-                            </Button>
-                          )}
-                          {/* 翻訳の削除ボタン */}
-                          <ConfirmDialog title="Delete this?" ok="OK">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteTranslation(index)}
-                            >
-                              <X className="h-4 w-4 text-red-600" />
-                              <span className="sr-only">
-                                Delete translation
-                              </span>
-                            </Button>
-                          </ConfirmDialog>
-                        </div>
-                      </div>
-                      {/* 翻訳元テキストの表示または編集 */}
-                      <EditableText
-                        io="input"
-                        item={item}
-                        index={index}
-                        lang={item.sourceLang}
-                        setTranslationHistory={setTranslationHistory}
-                      />
-                      <div className="flex justify-between items-start mb-1">
-                        {/* 翻訳先の言語表示 */}
-                        <span className="text-sm font-medium text-gray-500">
-                          {languages[item.targetLang]}
-                        </span>
-                      </div>
-                      {/* 翻訳先テキストの表示または編集 */}
-                      <EditableText
-                        io="output"
-                        item={item}
-                        index={index}
-                        lang={item.targetLang}
-                        setTranslationHistory={setTranslationHistory}
-                      />
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
-        </div>
-        {/* 入力部分 */}
-        <Card className="mb-4 fixed bottom-0 w-full max-w-3xl">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between items-center">
-              {/* 翻訳元の言語表示 */}
-              <span className="font-medium text-gray-700 min-w-[80px] text-center">
-                {languages[sourceLang]}
-              </span>
-              {/* 言語の入れ替えボタン */}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="hover:bg-gray-600"
-                onClick={handleSwapLanguages}
+      {/* メインのカードコンテナ */}
+      <div className="w-full max-w-3xl bg-white rounded-lg shadow-xl overflow-hidden fixed">
+        <Header />
+        {/* メインコンテンツ部分 */}
+        <div
+          className="p-4 overflow-y-auto"
+          style={{ height: "calc(100vh - 250px - 68px - 25px)" }}
+        >
+          {/* 翻訳履歴の表示 */}
+          <AnimatePresence>
+            {translationHistory.map((item, index) => (
+              <motion.div
+                key={item.timestamp}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
               >
-                <ArrowRightLeft className="h-4 w-4" />
-                <span className="sr-only">Swap languages</span>
-              </Button>
-              {/* 翻訳先の言語表示 */}
-              <span className="font-medium text-gray-700 min-w-[80px] text-center">
-                {languages[targetLang]}
-              </span>
-            </div>
-            {/* 翻訳するテキストを入力するテキストエリア */}
-            <textarea
-              className="w-full p-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none mb-2"
-              placeholder="Enter text to translate..."
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              onKeyDown={handleKeyDown}
-              rows={2}
-              aria-label="Input text for translation"
-            />
-            <div className="relative">
-              {/* 翻訳結果の表示 */}
-              <Label className="w-full p-2 rounded-md border border-gray-300 bg-gray-50 block mb-2 min-h-[64px] text-md">
-                {translatedText}
-              </Label>
-              {/* 翻訳中のローディングインジケーター */}
-              {isTranslating && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-50 rounded-md">
-                  <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-                </div>
-              )}
-            </div>
-            <div className="flex justify-end mt-2 space-x-4">
-              {/* 全ての翻訳を保存するボタン */}
-              <ConfirmDialog title="Save all results to vocabulary?" ok="Save">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="hover:bg-gray-600"
-                  disabled={
-                    translationHistory.length === 0 ||
-                    translationHistory.some((elem) => elem.saved)
-                  }
-                  onClick={() => {
-                    translationHistory.forEach((_, index) =>
-                      handleSaveTranslation(index)
-                    );
-                  }}
-                >
-                  Save All
-                </Button>
-              </ConfirmDialog>
-              {/* 翻訳履歴に追加するボタン */}
+                {/* 各翻訳履歴のカード */}
+                <Card className="mb-2 hover:shadow-md transition-shadow">
+                  <CardContent className="p-3">
+                    <div className="flex justify-between items-start mb-1">
+                      {/* 翻訳元の言語表示 */}
+                      <span className="text-sm font-medium text-gray-500">
+                        {languages[item.sourceLang]}
+                      </span>
+                      <div className="flex space-x-1">
+                        {/* 翻訳の保存ボタン */}
+                        <ConfirmDialog title="Save to vocabulary?" ok="Save">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleSaveTranslation(index)}
+                            disabled={item.saved}
+                          >
+                            {item.editing ? (
+                              <Save className="h-4 w-4 text-blue-600" />
+                            ) : item.saved ? (
+                              <Check className="h-4 w-4 text-green-600" />
+                            ) : (
+                              <Save className="h-4 w-4 text-blue-600" />
+                            )}
+                            <span className="sr-only">
+                              {item.editing
+                                ? "Save changes"
+                                : item.saved
+                                ? "Saved"
+                                : "Save translation"}
+                            </span>
+                          </Button>
+                        </ConfirmDialog>
+                        {/* 編集ボタン */}
+                        {!item.editing ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditTranslation(index)}
+                          >
+                            <Edit className="h-4 w-4 text-green-600" />
+                            <span className="sr-only">Edit translation</span>
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleCancelEdit(index)}
+                          >
+                            <RotateCcw className="h-4 w-4 text-green-600" />
+                            <span className="sr-only">Cancel edit</span>
+                          </Button>
+                        )}
+                        {/* 翻訳の削除ボタン */}
+                        <ConfirmDialog title="Delete this?" ok="OK">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteTranslation(index)}
+                          >
+                            <X className="h-4 w-4 text-red-600" />
+                            <span className="sr-only">Delete translation</span>
+                          </Button>
+                        </ConfirmDialog>
+                      </div>
+                    </div>
+                    {/* 翻訳元テキストの表示または編集 */}
+                    <EditableText
+                      io="input"
+                      item={item}
+                      index={index}
+                      lang={item.sourceLang}
+                      setTranslationHistory={setTranslationHistory}
+                    />
+                    <div className="flex justify-between items-start mb-1">
+                      {/* 翻訳先の言語表示 */}
+                      <span className="text-sm font-medium text-gray-500">
+                        {languages[item.targetLang]}
+                      </span>
+                    </div>
+                    {/* 翻訳先テキストの表示または編集 */}
+                    <EditableText
+                      io="output"
+                      item={item}
+                      index={index}
+                      lang={item.targetLang}
+                      setTranslationHistory={setTranslationHistory}
+                    />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      </div>
+      {/* 入力部分 */}
+      <Card className="mb-4 fixed bottom-0 w-full max-w-3xl">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between items-center">
+            {/* 翻訳元の言語表示 */}
+            <span className="font-medium text-gray-700 min-w-[80px] text-center">
+              {languages[sourceLang]}
+            </span>
+            {/* 言語の入れ替えボタン */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="hover:bg-gray-600"
+              onClick={handleSwapLanguages}
+            >
+              <ArrowRightLeft className="h-4 w-4" />
+              <span className="sr-only">Swap languages</span>
+            </Button>
+            {/* 翻訳先の言語表示 */}
+            <span className="font-medium text-gray-700 min-w-[80px] text-center">
+              {languages[targetLang]}
+            </span>
+          </div>
+          {/* 翻訳するテキストを入力するテキストエリア */}
+          <textarea
+            className="w-full p-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none mb-2"
+            placeholder="Enter text to translate..."
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            onKeyDown={handleKeyDown}
+            rows={2}
+            aria-label="Input text for translation"
+          />
+          <div className="relative">
+            {/* 翻訳結果の表示 */}
+            <Label className="w-full p-2 rounded-md border border-gray-300 bg-gray-50 block mb-2 min-h-[64px] text-md">
+              {translatedText}
+            </Label>
+            {/* 翻訳中のローディングインジケーター */}
+            {isTranslating && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-50 rounded-md">
+                <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+              </div>
+            )}
+          </div>
+          <div className="flex justify-end mt-2 space-x-4">
+            {/* 全ての翻訳を保存するボタン */}
+            <ConfirmDialog title="Save all results to vocabulary?" ok="Save">
               <Button
                 variant="outline"
                 size="sm"
                 className="hover:bg-gray-600"
-                onClick={handleAddToHistory}
+                disabled={
+                  translationHistory.length === 0 ||
+                  translationHistory.some((elem) => elem.saved)
+                }
+                onClick={() => {
+                  translationHistory.forEach((_, index) =>
+                    handleSaveTranslation(index)
+                  );
+                }}
               >
-                Submit
+                Save All
               </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </ConfirmDialog>
+            {/* 翻訳履歴に追加するボタン */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="hover:bg-gray-600"
+              onClick={handleAddToHistory}
+            >
+              Submit
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
