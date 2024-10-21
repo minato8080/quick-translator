@@ -74,7 +74,6 @@ export default function Translate() {
     targetLang: string
   ): Promise<string> => {
     try {
-      // if (1) return "test"; //TODO
       const apiUrl = process.env.NEXT_PUBLIC_GOOGLE_TRANSLATE_API;
       if (!apiUrl) {
         throw new Error("Google Translate API URL is not defined.");
@@ -84,6 +83,10 @@ export default function Translate() {
           text,
           source: sourceLang,
           target: targetLang,
+        },
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
       });
       return response.data.translatedText;
