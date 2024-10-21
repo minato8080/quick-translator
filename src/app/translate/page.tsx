@@ -83,6 +83,7 @@ export default function Translate() {
           text,
           source: sourceLang,
           target: targetLang,
+          crossDomain: true,
         },
         headers: {
           'Accept': 'application/json',
