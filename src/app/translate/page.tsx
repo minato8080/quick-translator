@@ -83,14 +83,14 @@ export default function Translate() {
           text,
           source: sourceLang,
           target: targetLang,
-          crossDomain: true,
         },
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       });
-      return response.data.translatedText;
+      console.log(response);
+      return response.data.text;
     } catch (error) {
       console.error("Failed to call the translation API:", error);
       showAlert("error", "Error", "Failed to call the translation API.");
