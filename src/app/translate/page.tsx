@@ -61,7 +61,7 @@ export default function Translate() {
           },
         })
       ).data;
-      if (response.code !== "200") {
+      if (response.code !== 200) {
         throw new Error(response.text);
       }
       return response.text;

@@ -22,6 +22,6 @@ export type FlashcardType = {
  * Google Translate APIのレスポンス型
  */
 export type GoogleTranslateAPIResponse = {
-  code: "200" | "400";
+  code: 200 | 400;
   text: string;
 };
