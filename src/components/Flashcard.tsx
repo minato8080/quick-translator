@@ -4,12 +4,83 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, RotateCcw, Save, Edit, Check } from "lucide-react";
 
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { EditableText } from "@/components/EditableText";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { languages } from "@/types/types";
 import { useFlashcardHandler } from "@/hooks/useFlashcardHandler";
+
+import { Volume2 } from "lucide-react";
+
+import type { FlashcardType } from "@/types/types";
+
+import { Input } from "@/components/ui/input";
+
+/**
+ * EditableTextコンポーネント
+ *
+ * このコンポーネントは、翻訳テキストを表示または編集するためのUIを提供します。
+ *
+ * @param io - テキストの種類（"input"または"output"）
+ * @param item - 表示または編集するWordCardオブジェクト
+ * @param index - WordCardのインデックス
+ * @param lang - 言語コード
+ * @param setFlashcards - 翻訳履歴を更新するための関数
+ *
+ * @returns 翻訳テキストの表示または編集UI
+ */
+const EditableText = ({
+  io,
+  item,
+  lang,
+  flashcardHandler,
+}: {
+  io: "input" | "output";
+  item: FlashcardType;
+  lang: string;
+  flashcardHandler: ReturnType<typeof useFlashcardHandler>;
+}) => {
+  const { editingText, setEditingText } = flashcardHandler;
+
+  /**
+   * テキストを音声で読み上げる関数
+   * @param text 読み上げるテキスト
+   * @param lang 言語コード
+   */
+  const handleTextToSpeech = (text: string, lang: string) => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = lang === "ja" ? "ja-JP" : "en-US";
+    window.speechSynthesis.speak(utterance);
+  };
+
+  return (
+    <div className="flex justify-between items-center mb-2">
+      {/* 翻訳元テキストの表示または編集 */}
+      {item.editing ? (
+        <Input
+          value={editingText ? editingText[io] : ""}
+          onChange={(e) =>
+            setEditingText((prev) =>
+              prev ? { ...prev, [io]: e.target.value } : null
+            )
+          }
+          className="flex-grow p-2 text-md"
+        />
+      ) : (
+        <p className="text-gray-800 p-2">{item[io]}</p>
+      )}
+      {/* 翻訳元テキストの音声再生ボタン */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => handleTextToSpeech(item[io], lang)}
+      >
+        <Volume2 className="h-4 w-4 text-blue-600" />
+        <span className="sr-only">Listen to source text</span>
+      </Button>
+    </div>
+  );
+};
 
 export const Flashcard = ({
   flashcardHandler,
@@ -18,7 +89,6 @@ export const Flashcard = ({
 }) => {
   const {
     flashcards,
-    setFlashcards,
     handleSaveTranslation,
     handleDeleteTranslation,
     handleEditTranslation,
@@ -50,7 +120,7 @@ export const Flashcard = ({
                       variant="ghost"
                       size="sm"
                       onClick={() => handleSaveTranslation(index)}
-                      disabled={item.saved}
+                      disabled={item.editing ? false : item.saved}
                     >
                       {item.editing ? (
                         <Save className="h-4 w-4 text-blue-600" />
@@ -82,7 +152,7 @@ export const Flashcard = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleCancelEdit(index)}
+                      onClick={() => handleCancelEdit()}
                     >
                       <RotateCcw className="h-4 w-4 text-green-600" />
                       <span className="sr-only">Cancel edit</span>
@@ -105,9 +175,8 @@ export const Flashcard = ({
               <EditableText
                 io="input"
                 item={item}
-                index={index}
                 lang={item.sourceLang}
-                setFlashcards={setFlashcards}
+                flashcardHandler={flashcardHandler}
               />
               <div className="flex justify-between items-start mb-1">
                 {/* 翻訳先の言語表示 */}
@@ -119,9 +188,8 @@ export const Flashcard = ({
               <EditableText
                 io="output"
                 item={item}
-                index={index}
                 lang={item.targetLang}
-                setFlashcards={setFlashcards}
+                flashcardHandler={flashcardHandler}
               />
             </CardContent>
           </Card>
