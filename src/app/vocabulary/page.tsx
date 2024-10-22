@@ -12,7 +12,7 @@ export default function Translate() {
       {/* メインのカードコンテナ */}
       <div className="w-full max-w-3xl bg-white rounded-lg shadow-xl overflow-hidden fixed">
         {/* ヘッダー部分 */}
-        <Header />
+        <Header title="Quick単語帳"/>
         {/* メインコンテンツ部分 */}
         <div className="p-4 overflow-y-auto">
           {/* 翻訳履歴の表示 */}

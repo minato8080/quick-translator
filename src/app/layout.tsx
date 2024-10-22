@@ -18,7 +18,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Quick Translator",
+  title: "Quick翻訳/単語帳",
   description: "A simple web text translator Japanese-English",
 };
 

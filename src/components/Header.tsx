@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  ArrowRightLeft,
-  Menu,
-  Book,
-} from "lucide-react";
+import { ArrowRightLeft, Menu, Book } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,12 +11,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 
-export const Header = () => {
+export const Header = ({title}: {title:string}) => {
   const router = useRouter();
   return (
     <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
       {/* アプリケーションのタイトル */}
-      <h1 className="text-2xl font-bold">Quick Translator</h1>
+      <h1 className="text-2xl font-bold">{title}</h1>
       <div className="flex items-center space-x-2">
         {/* ドロップダウンメニュー */}
         <DropdownMenu>
@@ -36,7 +32,7 @@ export const Header = () => {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {/* 翻訳画面への切り替え */}
-            <DropdownMenuItem 
+            <DropdownMenuItem
               onClick={() => router.push("/translate")}
               className="text-lg py-3 px-4 hover:bg-gray-300"
             >
@@ -44,7 +40,7 @@ export const Header = () => {
               <span>Translate</span>
             </DropdownMenuItem>
             {/* ボキャブラリー画面への切り替え */}
-            <DropdownMenuItem 
+            <DropdownMenuItem
               onClick={() => router.push("/vocabulary")}
               className="text-lg py-3 px-4 hover:bg-gray-300"
             >
