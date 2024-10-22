@@ -29,7 +29,8 @@ export default function Translate() {
   const { showAlert } = useAlertPopup();
 
   const flashcardHandler = useFlashcardHandler();
-  const { flashcards, setFlashcards, handleSaveTranslation } = flashcardHandler;
+  const { flashcards, setFlashcards, handleSaveAllTranslations } =
+    flashcardHandler;
 
   /**
    * 翻訳関数
@@ -221,11 +222,7 @@ export default function Translate() {
                   flashcards.length === 0 ||
                   flashcards.some((elem) => elem.saved)
                 }
-                onClick={() => {
-                  flashcards.forEach((_, index) =>
-                    handleSaveTranslation(index)
-                  );
-                }}
+                onClick={handleSaveAllTranslations}
               >
                 Save All
               </Button>
