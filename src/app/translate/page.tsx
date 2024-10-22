@@ -18,6 +18,7 @@ import { languages } from "@/types/types";
 import { Header } from "@/components/Header";
 import { Flashcard } from "@/components/Flashcard";
 import { useFlashcardHandler } from "@/hooks/useFlashcardHandler";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function Translate() {
   const [inputText, setInputText] = useState("");
@@ -156,7 +157,7 @@ export default function Translate() {
     <div className="min-h-screen bg-blue-50 flex flex-col items-center p-4">
       {/* メインのカードコンテナ */}
       <div className="w-full max-w-3xl bg-white rounded-lg shadow-xl overflow-hidden fixed">
-        <Header title="Quick翻訳"/>
+        <Header title="Quick翻訳" />
         {/* メインコンテンツ部分 */}
         <div
           className="p-4 overflow-y-auto"
@@ -169,11 +170,20 @@ export default function Translate() {
       {/* 入力部分 */}
       <Card className="mb-4 fixed bottom-0 w-full max-w-3xl">
         <CardContent className="p-4">
-          <div className="flex items-center justify-between items-center">
+          <div className="flex items-center justify-between items-center mb-2">
             {/* 翻訳元の言語表示 */}
-            <span className="font-medium text-gray-700 min-w-[80px] text-center">
-              {languages[sourceLang]}
-            </span>
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={sourceLang}
+                className="font-medium text-gray-700 min-w-[80px] text-center"
+                initial={{ y: 10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -10, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                {languages[sourceLang]}
+              </motion.span>
+            </AnimatePresence>
             {/* 言語の入れ替えボタン */}
             <Button
               variant="ghost"
@@ -185,9 +195,18 @@ export default function Translate() {
               <span className="sr-only">Swap languages</span>
             </Button>
             {/* 翻訳先の言語表示 */}
-            <span className="font-medium text-gray-700 min-w-[80px] text-center">
-              {languages[targetLang]}
-            </span>
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={targetLang}
+                className="font-medium text-gray-700 min-w-[80px] text-center"
+                initial={{ y: 10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -10, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                {languages[targetLang]}
+              </motion.span>
+            </AnimatePresence>
           </div>
           {/* 翻訳するテキストを入力するテキストエリア */}
           <textarea
@@ -217,7 +236,7 @@ export default function Translate() {
               <Button
                 variant="outline"
                 size="sm"
-                className="hover:bg-gray-600"
+                className="hover:bg-gray-600 text-[14px]"
                 disabled={
                   flashcards.length === 0 ||
                   flashcards.some((elem) => elem.saved)
@@ -231,7 +250,7 @@ export default function Translate() {
             <Button
               variant="outline"
               size="sm"
-              className="hover:bg-gray-600"
+              className="hover:bg-gray-600 text-[14px]"
               onClick={handleAddToHistory}
             >
               Submit
