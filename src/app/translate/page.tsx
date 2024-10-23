@@ -241,7 +241,7 @@ export default function Translate() {
                 className="hover:bg-gray-600 text-[14px]"
                 disabled={
                   flashcards.length === 0 ||
-                  flashcards.some((elem) => elem.saved)
+                  flashcards.every((elem) => elem.saved)
                 }
                 onClick={handleSaveAllTranslations}
               >
