@@ -157,7 +157,7 @@ export default function Translate() {
     <div className="min-h-screen bg-blue-50 flex flex-col items-center p-4">
       {/* メインのカードコンテナ */}
       <div className="w-full max-w-3xl bg-white rounded-lg shadow-xl overflow-hidden fixed">
-        <Header title="Quick翻訳" />
+        <Header english="Translator" japanese="翻訳" />
         {/* メインコンテンツ部分 */}
         <div
           className="p-4 overflow-y-auto"

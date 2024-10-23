@@ -10,13 +10,115 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
+import { motion, useAnimation } from "framer-motion";
+import { useEffect, useState } from "react";
 
-export const Header = ({title}: {title:string}) => {
+/**
+ * テキストをアニメーションで表示するコンポーネント
+ * @param english - 英語のテキスト
+ * @param japanese - 日本語のテキスト
+ * @returns アニメーションされたテキストを含む JSX 要素
+ */
+const TranslateAnimation = ({
+  english,
+  japanese,
+}: {
+  english: string;
+  japanese: string;
+}) => {
+  const [displayText, setDisplayText] = useState(english);
+  const [currentTitle, setCurrentTitle] = useState(english);
+
+  useEffect(() => {
+    // 英語のアニメーション
+    if (/^[A-Za-z]+$/.test(currentTitle)) {
+      let currentText = currentTitle;
+      const interval = setInterval(() => {
+        if (currentText.length > 0) {
+          currentText = currentText.slice(1);
+          setDisplayText(currentText);
+        } else {
+          clearInterval(interval);
+        }
+      }, 100); // 100ミリ秒ごとに文字を削除
+
+      return () => {
+        clearInterval(interval);
+      };
+    } else {
+      // 日本語のアニメーション
+      let currentIndex = 0;
+      const targetTitle = currentTitle;
+      const interval = setInterval(() => {
+        if (currentIndex <= targetTitle.length) {
+          setDisplayText(targetTitle.slice(0, currentIndex));
+          currentIndex++;
+        } else {
+          clearInterval(interval);
+        }
+      }, 100); // 100ミリ秒ごとに文字を追加
+
+      return () => {
+        clearInterval(interval);
+      };
+    }
+  }, [currentTitle]); // テキストが変更されたときにエフェクトを再実行
+
+  useEffect(() => {
+    // 表示テキストが空になったら日本語に切り替え
+    if (displayText === "") {
+      setCurrentTitle(japanese);
+    }
+  }, [displayText]);
+
+  return (
+    <span className="inline-block">
+      {displayText.split("").map((char, index) => (
+        <motion.span key={index}>{char}</motion.span>
+      ))}
+    </span>
+  );
+};
+/**
+ * ヘッダーコンポーネント
+ *
+ * @param english - 英語のタイトル
+ * @param japanese - 日本語のタイトル
+ * @returns ヘッダーUIをレンダリングするReactコンポーネント
+ */
+export const Header = ({
+  english,
+  japanese,
+}: {
+  english: string;
+  japanese: string;
+}) => {
   const router = useRouter();
+  const quickControls = useAnimation();
+
+  useEffect(() => {
+    const animateQuick = async () => {
+      await quickControls.start({
+        rotate: 360 * 5,
+        transition: { duration: 1, ease: "easeInOut" },
+      });
+      await quickControls.start({
+        rotate: 360 * 5,
+        transition: { duration: -2, ease: "easeOut" },
+      });
+    };
+    animateQuick();
+  }, [quickControls]);
+
   return (
     <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
       {/* アプリケーションのタイトル */}
-      <h1 className="text-2xl font-bold">{title}</h1>
+      <h1 className="text-2xl font-bold flex items-center">
+        <motion.span animate={quickControls} className="inline-block mr-2">
+          Quick
+        </motion.span>
+        <TranslateAnimation english={english} japanese={japanese} />
+      </h1>
       <div className="flex items-center space-x-2">
         {/* ドロップダウンメニュー */}
         <DropdownMenu>
