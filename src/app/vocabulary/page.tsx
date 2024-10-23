@@ -10,7 +10,7 @@ import { useFlashcardHandler } from "@/hooks/useFlashcardHandler";
 import { db } from "@/global/dexieDB";
 
 export default function Vocabulary() {
-  const flashcardHandler = useFlashcardHandler();
+  const flashcardHandler = useFlashcardHandler("vocabulary");
   const { setFlashcards } = flashcardHandler;
   const vocabulary = useLiveQuery(async () => {
     return await db.vocabulary.orderBy("timestamp").reverse().toArray();
@@ -29,7 +29,7 @@ export default function Vocabulary() {
       {/* メインのカードコンテナ */}
       <div className="w-full max-w-3xl bg-white rounded-lg shadow-xl overflow-hidden fixed">
         {/* ヘッダー部分 */}
-        <Header title="Quick単語帳"/>
+        <Header english="Vocabulary" japanese="単語帳" />
         {/* メインコンテンツ部分 */}
         <div
           className="p-4 overflow-y-auto"

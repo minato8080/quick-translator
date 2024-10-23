@@ -3,10 +3,12 @@
  */
 export const languages = {
   en: "English",
-  ja: "Japanese",
-};
+  ja: "日本語",
+} as const;
 
 export type LanguagesKeys = keyof typeof languages;
+
+export type ScreenMode = "translate" | "vocabulary";
 
 export type FlashcardType = {
   input: string;

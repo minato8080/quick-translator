@@ -1,14 +1,14 @@
 import { useState } from "react";
 
 import { useToast } from "@/hooks/use-toast";
-import { FlashcardType } from "@/types/types";
+import { FlashcardType, ScreenMode } from "@/types/types";
 import { db } from "@/global/dexieDB";
 
 /**
  * フラッシュカードの操作を管理するカスタムフック
  * @returns フラッシュカードの状態と操作関数を含むオブジェクト
  */
-export const useFlashcardHandler = () => {
+export const useFlashcardHandler = (screenMode: ScreenMode) => {
   const [editingText, setEditingText] = useState<
     (FlashcardType & { index: number }) | null
   >(null);
@@ -81,7 +81,8 @@ export const useFlashcardHandler = () => {
     handleCancelEdit();
     try {
       await db.vocabulary.delete(flashcards[index].timestamp);
-      // setFlashcards((prev) => prev.filter((_, i) => i !== index));
+      if (screenMode === "translate")
+        setFlashcards((prev) => prev.filter((_, i) => i !== index));
       toast({
         title: "Translation Deleted",
         description:

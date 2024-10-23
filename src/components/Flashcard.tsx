@@ -122,13 +122,29 @@ export const Flashcard = ({
                       onClick={() => handleSaveTranslation(index)}
                       disabled={item.editing ? false : item.saved}
                     >
-                      {item.editing ? (
-                        <Save className="h-4 w-4 text-blue-600" />
-                      ) : item.saved ? (
-                        <Check className="h-4 w-4 text-green-600" />
-                      ) : (
-                        <Save className="h-4 w-4 text-blue-600" />
-                      )}
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={
+                            item.editing
+                              ? "editing"
+                              : item.saved
+                              ? "saved"
+                              : "unsaved"
+                          }
+                          initial={{ opacity: 0, rotate: -180 }}
+                          animate={{ opacity: 1, rotate: 0 }}
+                          exit={{ opacity: 0, rotate: 180 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          {item.editing ? (
+                            <Save className="h-4 w-4 text-blue-600" />
+                          ) : item.saved ? (
+                            <Check className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <Save className="h-4 w-4 text-blue-600" />
+                          )}
+                        </motion.div>
+                      </AnimatePresence>
                       <span className="sr-only">
                         {item.editing
                           ? "Save changes"

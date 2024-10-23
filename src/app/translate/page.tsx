@@ -18,6 +18,7 @@ import { languages } from "@/types/types";
 import { Header } from "@/components/Header";
 import { Flashcard } from "@/components/Flashcard";
 import { useFlashcardHandler } from "@/hooks/useFlashcardHandler";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function Translate() {
   const [inputText, setInputText] = useState("");
@@ -25,10 +26,11 @@ export default function Translate() {
   const [sourceLang, setSourceLang] = useState<LanguagesKeys>("en");
   const [targetLang, setTargetLang] = useState<LanguagesKeys>("ja");
   const [isTranslating, setIsTranslating] = useState(false);
+  const [rotate, setRotate] = useState(0);
   const { toast } = useToast();
   const { showAlert } = useAlertPopup();
 
-  const flashcardHandler = useFlashcardHandler();
+  const flashcardHandler = useFlashcardHandler("translate");
   const { flashcards, setFlashcards, handleSaveAllTranslations } =
     flashcardHandler;
 
@@ -78,7 +80,6 @@ export default function Translate() {
    */
   const handleTranslation = useCallback(async () => {
     if (inputText) {
-      setIsTranslating(true);
       try {
         const result = await translateText(inputText, sourceLang, targetLang);
         setTranslatedText(result);
@@ -96,7 +97,7 @@ export default function Translate() {
       setTranslatedText("");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputText, sourceLang, targetLang, toast]);
+  }, [inputText, sourceLang, targetLang]);
 
   /**
    * 入力テキストが変更されたときに翻訳をトリガーする
@@ -117,6 +118,7 @@ export default function Translate() {
     setTargetLang(sourceLang);
     setInputText(translatedText);
     setTranslatedText("");
+    setRotate((prev) => prev + 180);
   };
 
   /**
@@ -156,7 +158,7 @@ export default function Translate() {
     <div className="min-h-screen bg-blue-50 flex flex-col items-center p-4">
       {/* メインのカードコンテナ */}
       <div className="w-full max-w-3xl bg-white rounded-lg shadow-xl overflow-hidden fixed">
-        <Header title="Quick翻訳"/>
+        <Header english="Translator" japanese="翻訳" />
         {/* メインコンテンツ部分 */}
         <div
           className="p-4 overflow-y-auto"
@@ -169,32 +171,55 @@ export default function Translate() {
       {/* 入力部分 */}
       <Card className="mb-4 fixed bottom-0 w-full max-w-3xl">
         <CardContent className="p-4">
-          <div className="flex items-center justify-between items-center">
+          <div className="flex items-center justify-between items-center mb-2">
             {/* 翻訳元の言語表示 */}
-            <span className="font-medium text-gray-700 min-w-[80px] text-center">
-              {languages[sourceLang]}
-            </span>
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={sourceLang}
+                className="font-medium text-gray-700 min-w-[80px] text-center"
+                initial={{ y: 10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -10, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                {languages[sourceLang]}
+              </motion.span>
+            </AnimatePresence>
             {/* 言語の入れ替えボタン */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hover:bg-gray-600"
-              onClick={handleSwapLanguages}
-            >
-              <ArrowRightLeft className="h-4 w-4" />
-              <span className="sr-only">Swap languages</span>
-            </Button>
+            <motion.div animate={{ rotate }} transition={{ duration: 0.3 }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hover:bg-gray-600"
+                onClick={handleSwapLanguages}
+              >
+                <ArrowRightLeft className="h-4 w-4" />
+                <span className="sr-only">Swap languages</span>
+              </Button>
+            </motion.div>
             {/* 翻訳先の言語表示 */}
-            <span className="font-medium text-gray-700 min-w-[80px] text-center">
-              {languages[targetLang]}
-            </span>
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={targetLang}
+                className="font-medium text-gray-700 min-w-[80px] text-center"
+                initial={{ y: 10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -10, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                {languages[targetLang]}
+              </motion.span>
+            </AnimatePresence>
           </div>
           {/* 翻訳するテキストを入力するテキストエリア */}
           <textarea
             className="w-full p-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none mb-2"
             placeholder="Enter text to translate..."
             value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
+            onChange={(e) => {
+              setIsTranslating(true);
+              setInputText(e.target.value);
+            }}
             onKeyDown={handleKeyDown}
             rows={2}
             aria-label="Input text for translation"
@@ -217,10 +242,10 @@ export default function Translate() {
               <Button
                 variant="outline"
                 size="sm"
-                className="hover:bg-gray-600"
+                className="hover:bg-gray-600 text-[14px]"
                 disabled={
                   flashcards.length === 0 ||
-                  flashcards.some((elem) => elem.saved)
+                  flashcards.every((elem) => elem.saved)
                 }
                 onClick={handleSaveAllTranslations}
               >
@@ -231,8 +256,9 @@ export default function Translate() {
             <Button
               variant="outline"
               size="sm"
-              className="hover:bg-gray-600"
+              className="hover:bg-gray-600 text-[14px]"
               onClick={handleAddToHistory}
+              disabled={inputText === ""}
             >
               Submit
             </Button>
