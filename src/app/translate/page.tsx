@@ -26,6 +26,7 @@ export default function Translate() {
   const [sourceLang, setSourceLang] = useState<LanguagesKeys>("en");
   const [targetLang, setTargetLang] = useState<LanguagesKeys>("ja");
   const [isTranslating, setIsTranslating] = useState(false);
+  const [rotate, setRotate] = useState(0);
   const { toast } = useToast();
   const { showAlert } = useAlertPopup();
 
@@ -117,6 +118,7 @@ export default function Translate() {
     setTargetLang(sourceLang);
     setInputText(translatedText);
     setTranslatedText("");
+    setRotate((prev) => prev + 180);
   };
 
   /**
@@ -184,15 +186,17 @@ export default function Translate() {
               </motion.span>
             </AnimatePresence>
             {/* 言語の入れ替えボタン */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hover:bg-gray-600"
-              onClick={handleSwapLanguages}
-            >
-              <ArrowRightLeft className="h-4 w-4" />
-              <span className="sr-only">Swap languages</span>
-            </Button>
+            <motion.div animate={{ rotate }} transition={{ duration: 0.3 }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hover:bg-gray-600"
+                onClick={handleSwapLanguages}
+              >
+                <ArrowRightLeft className="h-4 w-4" />
+                <span className="sr-only">Swap languages</span>
+              </Button>
+            </motion.div>
             {/* 翻訳先の言語表示 */}
             <AnimatePresence mode="wait">
               <motion.span
@@ -254,6 +258,7 @@ export default function Translate() {
               size="sm"
               className="hover:bg-gray-600 text-[14px]"
               onClick={handleAddToHistory}
+              disabled={inputText === ""}
             >
               Submit
             </Button>
