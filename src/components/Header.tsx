@@ -40,7 +40,7 @@ const TranslateAnimation = ({
         } else {
           clearInterval(interval);
         }
-      }, 100); // 100ミリ秒ごとに文字を削除
+      }, 50); // 100ミリ秒ごとに文字を削除
 
       return () => {
         clearInterval(interval);
@@ -56,7 +56,7 @@ const TranslateAnimation = ({
         } else {
           clearInterval(interval);
         }
-      }, 100); // 100ミリ秒ごとに文字を追加
+      }, 50); // 100ミリ秒ごとに文字を追加
 
       return () => {
         clearInterval(interval);
@@ -99,11 +99,11 @@ export const Header = ({
   useEffect(() => {
     const animateQuick = async () => {
       await quickControls.start({
-        rotate: 360 * 5,
+        rotate: 360 * 4,
         transition: { duration: 1, ease: "easeInOut" },
       });
       await quickControls.start({
-        rotate: 360 * 5,
+        rotate: 360 * 4,
         transition: { duration: -2, ease: "easeOut" },
       });
     };
