@@ -79,7 +79,6 @@ export default function Translate() {
    */
   const handleTranslation = useCallback(async () => {
     if (inputText) {
-      setIsTranslating(true);
       try {
         const result = await translateText(inputText, sourceLang, targetLang);
         setTranslatedText(result);
@@ -97,7 +96,7 @@ export default function Translate() {
       setTranslatedText("");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputText, sourceLang, targetLang, toast]);
+  }, [inputText, sourceLang, targetLang]);
 
   /**
    * 入力テキストが変更されたときに翻訳をトリガーする
@@ -213,7 +212,10 @@ export default function Translate() {
             className="w-full p-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none mb-2"
             placeholder="Enter text to translate..."
             value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
+            onChange={(e) => {
+              setIsTranslating(true);
+              setInputText(e.target.value);
+            }}
             onKeyDown={handleKeyDown}
             rows={2}
             aria-label="Input text for translation"
