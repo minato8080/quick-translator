@@ -10,7 +10,7 @@ import { useFlashcardHandler } from "@/hooks/useFlashcardHandler";
 import { db } from "@/global/dexieDB";
 
 export default function Vocabulary() {
-  const flashcardHandler = useFlashcardHandler();
+  const flashcardHandler = useFlashcardHandler("vocabulary");
   const { setFlashcards } = flashcardHandler;
   const vocabulary = useLiveQuery(async () => {
     return await db.vocabulary.orderBy("timestamp").reverse().toArray();

@@ -8,6 +8,8 @@ export const languages = {
 
 export type LanguagesKeys = keyof typeof languages;
 
+export type ScreenMode = "translate" | "vocabulary";
+
 export type FlashcardType = {
   input: string;
   output: string;

@@ -29,7 +29,7 @@ export default function Translate() {
   const { toast } = useToast();
   const { showAlert } = useAlertPopup();
 
-  const flashcardHandler = useFlashcardHandler();
+  const flashcardHandler = useFlashcardHandler("translate");
   const { flashcards, setFlashcards, handleSaveAllTranslations } =
     flashcardHandler;
 
