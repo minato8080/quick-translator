@@ -310,26 +310,31 @@ export const Flashcard = ({
   return (
     <AnimatePresence>
       {isGroupedView ? (
-        Object.entries(groupedHistory).map(([date, items], index) => (
-          <motion.div
-            key={date}
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className="flex items-center space-x-2 m-1">
-              <div className="h-px bg-gray-300 flex-grow" />
-              <h3 className="text-md font-semibold text-gray-500">{date}</h3>
-              <div className="h-px bg-gray-300 flex-grow" />
-            </div>
-            <CardCore
-              items={items}
-              flashcardHandler={flashcardHandler}
-              startIndex={index}
-              isLearningMode={isLearningMode}
-            />
-          </motion.div>
-        ))
+        ((indexAdjuster = 0) =>
+          Object.entries(groupedHistory).map(([date, items]) => (
+            <motion.div
+              key={date}
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="flex items-center space-x-2 m-1">
+                <div className="h-px bg-gray-300 flex-grow" />
+                <h3 className="text-md font-semibold text-gray-500">{date}</h3>
+                <div className="h-px bg-gray-300 flex-grow" />
+              </div>
+              <CardCore
+                items={items}
+                flashcardHandler={flashcardHandler}
+                startIndex={(() => {
+                  const index = indexAdjuster;
+                  indexAdjuster += items.length;
+                  return index;
+                })()}
+                isLearningMode={isLearningMode}
+              />
+            </motion.div>
+          )))()
       ) : (
         <CardCore
           items={flashcards}
