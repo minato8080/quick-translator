@@ -18,6 +18,7 @@ export type FlashcardType = {
   saved: boolean;
   editing: boolean;
   timestamp: string;
+  visible: boolean;
 };
 
 /**

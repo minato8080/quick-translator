@@ -134,6 +134,7 @@ export default function Translate() {
           targetLang: targetLang,
           saved: false,
           editing: false,
+          visible: true,
           timestamp: new Date().toISOString(),
         },
         ...prev,
@@ -155,21 +156,24 @@ export default function Translate() {
   };
 
   return (
-    <div className="min-h-screen bg-blue-50 flex flex-col items-center p-4">
+    <div className="min-h-screen bg-blue-50 flex flex-col items-center">
       {/* メインのカードコンテナ */}
-      <div className="w-full max-w-3xl bg-white rounded-lg shadow-xl overflow-hidden fixed">
+      <div className="w-full max-w-3xl bg-white rounded-lg overflow-hidden fixed">
         <Header english="Translator" japanese="翻訳" />
         {/* メインコンテンツ部分 */}
         <div
-          className="p-4 overflow-y-auto"
-          style={{ height: "calc(100vh - 250px - 68px - 25px)" }}
+          className="p-2 overflow-y-auto"
+          style={{ height: "calc(100vh - 257px - 56px)" }}
         >
           {/* 翻訳履歴の表示 */}
-          <Flashcard flashcardHandler={flashcardHandler} />
+          <Flashcard
+            flashcardHandler={flashcardHandler}
+            isGroupedView={false}
+          />
         </div>
       </div>
       {/* 入力部分 */}
-      <Card className="mb-4 fixed bottom-0 w-full max-w-3xl">
+      <Card className="fixed bottom-0 w-full max-w-3xl">
         <CardContent className="p-4">
           <div className="flex items-center justify-between items-center mb-2">
             {/* 翻訳元の言語表示 */}
