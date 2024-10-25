@@ -45,7 +45,7 @@ export default function Vocabulary() {
         {/* メインコンテンツ部分 */}
         <div>
           <div className="flex justify-between items-center mb-2 m-1">
-            <div className="flex items-center">
+            <div className="flex">
               {/* 検索ボタン */}
               <Button
                 variant="outline"
@@ -57,7 +57,7 @@ export default function Vocabulary() {
               {/* 日付選択コンポーネント */}
               <DatePicker date={selectedDate} setDate={setSelectedDate} />
             </div>
-            <div className="flex items-center space-x-4 ml-auto">
+            <div className="flex space-x-4 ml-auto">
               <div className="flex items-center space-x-2">
                 {/* 学習モードのアイコン表示 */}
                 {isLearningMode ? (

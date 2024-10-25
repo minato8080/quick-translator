@@ -121,7 +121,7 @@ const CardCore = ({
               <AnimatePresence mode="wait">
                 <div className="flex justify-between items-start mb-1">
                   {/* 翻訳元の言語表示 */}
-                  <span className="text-sm font-medium text-gray-500">
+                  <span className="text-[12px] font-medium text-gray-400">
                     {languages[item.sourceLang]} → {languages[item.targetLang]}
                   </span>
                   {/* ボタンを配置する場所*/}
