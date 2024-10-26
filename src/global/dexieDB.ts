@@ -1,14 +1,14 @@
 import { LanguagesKeys } from "@/types/types";
 import Dexie, { type EntityTable } from "dexie";
 
-export interface Vocabulary {
+export type Vocabulary = {
   timestamp: string;
   input: string;
   output: string;
   sourceLang: LanguagesKeys;
   targetLang: LanguagesKeys;
 }
-export interface Calendar {
+export type Calendar = {
   date: string;
   count: number;
 }

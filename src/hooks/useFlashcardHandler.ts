@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { useToast } from "@/hooks/use-toast";
 import { FlashcardType, ScreenMode, FORMAT } from "@/types/types";
-import { db } from "@/global/dexieDB";
+import { db, Vocabulary } from "@/global/dexieDB";
 import { format, parse } from "date-fns";
 
 /**
@@ -31,7 +31,14 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
         );
       }
       // 更新されたフラッシュカードをデータベースに保存
-      await db.vocabulary.put({ ...updatedFlashcards[index] });
+      const item = updatedFlashcards[index];
+      await db.vocabulary.put({
+        input: item.input,
+        output: item.output,
+        sourceLang: item.sourceLang,
+        targetLang: item.targetLang,
+        timestamp: item.timestamp,
+      });
 
       if (screenMode === "translate") {
         // タイムスタンプから日付を抽出
@@ -88,13 +95,28 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
           i === editingText.index ? editingText : item
         );
       }
-      const unsavedFlashcards = updatedFlashcards.filter((card) => !card.saved);
+      const unsavedFlashcards = updatedFlashcards
+        .filter((card) => !card.saved)
+        .map((item) => ({
+          input: item.input,
+          output: item.output,
+          sourceLang: item.sourceLang,
+          targetLang: item.targetLang,
+          timestamp: item.timestamp,
+        }));
       await db.vocabulary.bulkAdd(unsavedFlashcards);
 
       const dates: string[] = Array.from(
-        new Set(unsavedFlashcards.map((card) => card.timestamp.split(" ")[0]))
+        new Set(
+          unsavedFlashcards.map((card) =>
+            format(
+              parse(card.timestamp, FORMAT.TIMESTAMP, new Date()),
+              FORMAT.DATE
+            )
+          )
+        )
       );
-      for (let date in dates) {
+      for (let date of dates) {
         // 同じ日付のエントリー数をカウント
         const sameDateEntries = await db.vocabulary
           .where("timestamp")
