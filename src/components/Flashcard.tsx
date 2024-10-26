@@ -73,15 +73,19 @@ const EditableText = ({
           className="flex-grow p-2 text-md"
         />
       ) : (
-        <p
+        <motion.p
+          key={io === "output" && item.visible ? "visible" : "invisible"}
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
           className={`${
-              io === "output" && !item.visible
+            io === "output" && !item.visible
               ? "text-transparent"
               : "text-gray-800"
           } p-2`}
         >
           {item[io]}
-        </p>
+        </motion.p>
       )}
       {/* 翻訳元テキストの音声再生ボタン */}
       <Button
