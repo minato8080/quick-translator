@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# quick-translator
 
-## Getting Started
+## 概要
 
-First, run the development server:
+quick-translatorは、日本語と英語のテキスト翻訳機能を提供するWEBアプリです。
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+英語学習を支援するための機能を提供します。
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+DB含めてクライアントサイドで完結しているためバックエンドはありません。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+翻訳機能はGoogle Apps ScriptでGoogle翻訳APIを作成し、ブラウザから直接アクセスを行います。
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 機能
 
-## Learn More
+### 翻訳画面
 
-To learn more about Next.js, take a look at the following resources:
+- **テキスト入力**: 日本語または英語のテキストを入力可能。
+- **英語↔日本語**: 英語と日本語で双方向の翻訳をサポート。
+- **音声再生機能**: 翻訳結果を音声で再生する機能を提供。
+- **登録**: 翻訳結果を登録。
+- **全登録**: すべての翻訳結果を一括登録。
+- **編集**: 翻訳結果を編集。
+- **削除**: 翻訳結果を削除。
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 単語帳画面
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **日付検索**: 年、月、日それぞれの範囲で指定して翻訳履歴を検索可能。
+- **編集モード**: 翻訳画面と同様の編集機能。
+- **学習モード**: 翻訳結果の表示を切り替え、学習する言語を切り替え。
+- **全削除**: 表示中のすべての翻訳結果を削除。
 
-## Deploy on Vercel
+## 技術スタック
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **エディタ**: Cursor
+- **バージョン管理**: Git
+- **ソース管理**: GitHub
+- **パッケージ管理**: pnpm
+- **フロントエンド**: Next.js, Tailwind CSS, shadcn/ui, Lucide
+- **データベース**: IndexedDB, Dexie.js
+- **デプロイ環境**: Vercel
+- **AIツール**: v0

@@ -62,8 +62,8 @@ export default function Vocabulary() {
         <Header english="Vocabulary" japanese="単語帳" />
         {/* メインコンテンツ部分 */}
         <div>
-          <div className="flex justify-between items-center mb-2 m-1">
-            <div className="flex">
+          <div className="flex flex-wrap justify-between items-center m-1">
+            <div className="flex mb-2">
               {/* 日付選択コンポーネント */}
               <DatePicker setDate={setSelectedDate} calendar={calendar} />
               {/* 検索ボタン */}
@@ -78,7 +78,7 @@ export default function Vocabulary() {
                 <Search className="h-4 w-4" />
               </Button>
             </div>
-            <div className="flex ml-auto">
+            <div className="flex ml-auto mb-2">
               {/* 翻訳の削除ボタン */}
               {!isLearningMode ? (
                 <ConfirmDialog

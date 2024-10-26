@@ -14,8 +14,7 @@ import { Volume2 } from "lucide-react";
 
 import type { FlashcardType, LearningMode } from "@/types/types";
 
-import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import { Switch } from "./ui/switch";
 import { format } from "date-fns";
 
@@ -64,6 +63,114 @@ const SpeakerButton = ({
 };
 
 /**
+ * 入力または出力のタイプを切り替える
+ * @param learningMode - 学習モードのタイプ
+ * @param item - フラッシュカードのアイテム
+ * @param io - 入力または出力のタイプ
+ * @returns IOType
+ */
+const switchIO = (
+  learningMode: LearningMode,
+  item: FlashcardType,
+  io: IOType
+): IOType => {
+  switch (learningMode) {
+    case "origin":
+      return io;
+    case "en-ja":
+      return (item.sourceLang === "en") === (io === "input")
+        ? "input"
+        : "output";
+    case "ja-en":
+      return (item.targetLang === "en") === (io === "input")
+        ? "input"
+        : "output";
+    default:
+      return "input";
+  }
+};
+
+/**
+ * スピーカーの言語を切り替える
+ * @param learningMode - 学習モードのタイプ
+ * @param item - フラッシュカードのアイテム
+ * @param io - 入力または出力のタイプ
+ * @returns string
+ */
+const switchSpeaker = (
+  learningMode: LearningMode,
+  item: FlashcardType,
+  io: IOType
+) => {
+  switch (learningMode) {
+    case "origin":
+      return io === "input" ? item.sourceLang : item.targetLang;
+    case "en-ja":
+      return io === "input" ? "en" : "ja";
+    case "ja-en":
+      return io === "output" ? "en" : "ja";
+    default:
+      return "";
+  }
+};
+
+/**
+ * 編集可能なテキストコンポーネント
+ * @param io - 入力または出力のタイプ
+ * @param item - フラッシュカードのアイテム
+ */
+const EditableText = ({
+  io,
+  item,
+  editingText,
+  setEditingText,
+  isLearningMode,
+  learningMode,
+}: {
+  io: IOType;
+  item: FlashcardType;
+  editingText: FlashcardType | null;
+  setEditingText: React.Dispatch<
+    SetStateAction<
+      | (FlashcardType & {
+          index: number;
+        })
+      | null
+    >
+  >;
+  isLearningMode: boolean;
+  learningMode: LearningMode;
+}) => {
+  return (
+    <>
+      {item.editing ? (
+        <textarea
+          value={editingText ? editingText[io] : ""}
+          onChange={(e) =>
+            setEditingText((prev) =>
+              prev ? { ...prev, [io]: e.target.value } : null
+            )
+          }
+          className="flex-grow p-2 text-md"
+        />
+      ) : (
+        <p
+          className={`${
+            !isLearningMode
+              ? "text-gray-800"
+              : switchIO(learningMode, item, io) === "output" && !item.visible
+              ? "text-transparent"
+              : "text-gray-800"
+          } p-2`}
+        >
+          {item[io]}
+        </p>
+      )}
+    </>
+  );
+};
+
+/**
  * カード本体コンポーネント
  * @param flashcardHandler - フラッシュカードのハンドラー
  * @param items - フラッシュカードのアイテムリスト
@@ -92,93 +199,6 @@ const CardCore = ({
     handleEditTranslation,
     handleCancelEdit,
   } = flashcardHandler;
-
-  /**
-   * 入力または出力のタイプを切り替える
-   * @param learningMode - 学習モードのタイプ
-   * @param item - フラッシュカードのアイテム
-   * @param io - 入力または出力のタイプ
-   * @returns IOType
-   */
-  const switchIO = (
-    learningMode: LearningMode,
-    item: FlashcardType,
-    io: IOType
-  ): IOType => {
-    switch (learningMode) {
-      case "origin":
-        return io;
-      case "en-ja":
-        return (item.sourceLang === "en") === (io === "input")
-          ? "input"
-          : "output";
-      case "ja-en":
-        return (item.targetLang === "en") === (io === "input")
-          ? "input"
-          : "output";
-      default:
-        return "input";
-    }
-  };
-
-  /**
-   * スピーカーの言語を切り替える
-   * @param learningMode - 学習モードのタイプ
-   * @param item - フラッシュカードのアイテム
-   * @param io - 入力または出力のタイプ
-   * @returns string
-   */
-  const switchSpeaker = (
-    learningMode: LearningMode,
-    item: FlashcardType,
-    io: IOType
-  ) => {
-    switch (learningMode) {
-      case "origin":
-        return io === "input" ? item.sourceLang : item.targetLang;
-      case "en-ja":
-        return io === "input" ? "en" : "ja";
-      case "ja-en":
-        return io === "output" ? "en" : "ja";
-      default:
-        return "";
-    }
-  };
-
-  /**
-   * 編集可能なテキストコンポーネント
-   * @param io - 入力または出力のタイプ
-   * @param item - フラッシュカードのアイテム
-   */
-  const EditableText = ({ io, item }: { io: IOType; item: FlashcardType }) => {
-    return (
-      <>
-        {item.editing ? (
-          <Input
-            value={editingText ? editingText[io] : ""}
-            onChange={(e) =>
-              setEditingText((prev) =>
-                prev ? { ...prev, [io]: e.target.value } : null
-              )
-            }
-            className="flex-grow p-2 text-md"
-          />
-        ) : (
-          <p
-            className={`${
-              !isLearningMode
-                ? "text-gray-800"
-                : switchIO(learningMode, item, io) === "output" && !item.visible
-                ? "text-transparent"
-                : "text-gray-800"
-            } p-2`}
-          >
-            {item[io]}
-          </p>
-        )}
-      </>
-    );
-  };
 
   return (
     <>
@@ -337,6 +357,10 @@ const CardCore = ({
                 <EditableText
                   io={switchIO(learningMode, item, "input")}
                   item={item}
+                  editingText={editingText}
+                  setEditingText={setEditingText}
+                  isLearningMode={isLearningMode}
+                  learningMode={learningMode}
                 />
                 <SpeakerButton
                   io={switchIO(learningMode, item, "input")}
@@ -349,6 +373,10 @@ const CardCore = ({
                 <EditableText
                   io={switchIO(learningMode, item, "output")}
                   item={item}
+                  editingText={editingText}
+                  setEditingText={setEditingText}
+                  isLearningMode={isLearningMode}
+                  learningMode={learningMode}
                 />
                 <SpeakerButton
                   io={switchIO(learningMode, item, "output")}
