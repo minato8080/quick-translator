@@ -1,8 +1,9 @@
 import { useState } from "react";
 
 import { useToast } from "@/hooks/use-toast";
-import { FlashcardType, ScreenMode } from "@/types/types";
+import { FlashcardType, ScreenMode, FORMAT } from "@/types/types";
 import { db } from "@/global/dexieDB";
+import { format, parse } from "date-fns";
 
 /**
  * フラッシュカードの操作を管理するカスタムフック
@@ -31,6 +32,31 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
       }
       // 更新されたフラッシュカードをデータベースに保存
       await db.vocabulary.put({ ...updatedFlashcards[index] });
+
+      if (screenMode === "translate") {
+        // タイムスタンプから日付を抽出
+        const date = format(
+          parse(
+            updatedFlashcards[index].timestamp,
+            FORMAT.TIMESTAMP,
+            new Date()
+          ),
+          FORMAT.DATE
+        );
+
+        // 同じ日付のエントリー数をカウント
+        const sameDateEntries = await db.vocabulary
+          .where("timestamp")
+          .startsWith(date)
+          .count();
+
+        // カレンダーに日付とエントリー数を保存
+        await db.calendar.put({
+          date: date,
+          count: sameDateEntries,
+        });
+      }
+
       setFlashcards(
         updatedFlashcards.map((item, i) =>
           i === index ? { ...item, saved: true, editing: false } : item
@@ -54,8 +80,33 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
    */
   const handleSaveAllTranslations = async () => {
     try {
-      const unsavedFlashcards = flashcards.filter((card) => !card.saved);
+      // フラッシュカードのリストを更新するための変数を初期化
+      let updatedFlashcards = flashcards;
+      // 編集中のテキストが存在する場合、フラッシュカードのリストを更新
+      if (editingText) {
+        updatedFlashcards = flashcards.map((item, i) =>
+          i === editingText.index ? editingText : item
+        );
+      }
+      const unsavedFlashcards = updatedFlashcards.filter((card) => !card.saved);
       await db.vocabulary.bulkAdd(unsavedFlashcards);
+
+      const dates: string[] = Array.from(
+        new Set(unsavedFlashcards.map((card) => card.timestamp.split(" ")[0]))
+      );
+      for (let date in dates) {
+        // 同じ日付のエントリー数をカウント
+        const sameDateEntries = await db.vocabulary
+          .where("timestamp")
+          .startsWith(date)
+          .count();
+
+        // カレンダーに日付とエントリー数を保存
+        await db.calendar.put({
+          date: date,
+          count: sameDateEntries,
+        });
+      }
       setFlashcards((prev) =>
         prev.map((item) => ({ ...item, saved: true, editing: false }))
       );
@@ -81,8 +132,32 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
     handleCancelEdit();
     try {
       await db.vocabulary.delete(flashcards[index].timestamp);
-      if (screenMode === "translate")
+
+      if (!flashcards[index].saved) {
+        // タイムスタンプから日付を抽出
+        const date = format(
+          parse(flashcards[index].timestamp, FORMAT.TIMESTAMP, new Date()),
+          FORMAT.DATE
+        );
+
+        // 同じ日付
+        const result = await db.calendar.get({ date: date });
+        if (!result) return;
+        if (result.count > 1) {
+          // カレンダーを更新
+          await db.calendar.put({
+            date: date,
+            count: result.count - 1,
+          });
+        } else {
+          // カレンダーから削除
+          await db.calendar.where("date").equals(date).delete();
+        }
+      }
+      // vocabulary画面は自動クエリなので操作しない
+      if (screenMode !== "vocabulary")
         setFlashcards((prev) => prev.filter((_, i) => i !== index));
+
       toast({
         title: "Translation Deleted",
         description:
