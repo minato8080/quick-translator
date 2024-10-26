@@ -17,6 +17,7 @@ import type { FlashcardType } from "@/types/types";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { Switch } from "./ui/switch";
+import { format } from "date-fns";
 
 /**
  * EditableTextコンポーネント
@@ -296,7 +297,7 @@ export const Flashcard = ({
   useEffect(() => {
     if (isGroupedView) {
       const newGroupedHistory = flashcards.reduce((acc, item) => {
-        const date = new Date(item.timestamp).toLocaleDateString();
+        const date = format(new Date(item.timestamp),"yyyy/MM/dd");
         if (!acc[date]) {
           acc[date] = [];
         }

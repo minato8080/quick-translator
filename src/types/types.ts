@@ -28,3 +28,8 @@ export type GoogleTranslateAPIResponse = {
   code: 200 | 400;
   text: string;
 };
+
+export const FORMAT = {
+  TIMESTAMP: "yyyy-MM-dd HH:mm:ss",
+  DATE: "yyyy-MM-dd",
+} as const;

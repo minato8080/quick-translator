@@ -14,11 +14,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAlertPopup } from "@/hooks/useAlertPopup";
-import { languages } from "@/types/types";
+import { languages, FORMAT } from "@/types/types";
 import { Header } from "@/components/Header";
 import { Flashcard } from "@/components/Flashcard";
 import { useFlashcardHandler } from "@/hooks/useFlashcardHandler";
 import { AnimatePresence, motion } from "framer-motion";
+import { format } from "date-fns";
 
 export default function Translate() {
   const [inputText, setInputText] = useState("");
@@ -135,7 +136,7 @@ export default function Translate() {
           saved: false,
           editing: false,
           visible: true,
-          timestamp: new Date().toISOString(),
+          timestamp: format(new Date(), FORMAT.TIMESTAMP),
         },
         ...prev,
       ]);

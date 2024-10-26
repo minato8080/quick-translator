@@ -17,10 +17,22 @@ export default function Vocabulary() {
   const flashcardHandler = useFlashcardHandler("vocabulary");
   const [isLearningMode, setIsLearningMode] = useState(true);
   const [isTextAreaVisible, setIsTextAreaVisible] = useState(true);
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toLocaleDateString()
+  );
+  const [conditionDate, setConditionDate] = useState(
+    new Date().getFullYear().toString()
+  );
   const { setFlashcards } = flashcardHandler;
   const vocabulary = useLiveQuery(async () => {
-    return await db.vocabulary.orderBy("timestamp").reverse().toArray();
+    return await db.vocabulary
+      ?.where("timestamp")
+      .startsWith(conditionDate)
+      .sortBy("timestamp")
+      .then((res) => res.reverse());
+  }, [conditionDate]);
+  const calendar = useLiveQuery(async () => {
+    return await db.calendar?.toArray();
   });
 
   useEffect(() => {
