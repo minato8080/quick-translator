@@ -23,7 +23,7 @@ export default function Vocabulary() {
   const [conditionDate, setConditionDate] = useState(
     new Date().getFullYear().toString()
   );
-  const { setFlashcards } = flashcardHandler;
+  const { setFlashcards, handleCancelEdit } = flashcardHandler;
   const vocabulary = useLiveQuery(async () => {
     return await db.vocabulary
       ?.where("timestamp")
@@ -84,7 +84,16 @@ export default function Vocabulary() {
                 <Switch
                   id="learning-mode"
                   checked={isLearningMode}
-                  onCheckedChange={setIsLearningMode}
+                  onCheckedChange={(value) => {
+                    handleCancelEdit();
+                    setIsLearningMode(value);
+                    !value && setIsTextAreaVisible(true);
+                    !value && setFlashcards((prev) =>
+                      prev.map((flashcard) => {
+                        return { ...flashcard, visible: true };
+                      })
+                    );
+                  }}
                   className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-teal-600"
                 />
               </div>

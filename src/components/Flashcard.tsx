@@ -73,7 +73,15 @@ const EditableText = ({
           className="flex-grow p-2 text-md"
         />
       ) : (
-        <p className="text-gray-800 p-2">{item[io]}</p>
+        <p
+          className={`${
+              io === "output" && !item.visible
+              ? "text-transparent"
+              : "text-gray-800"
+          } p-2`}
+        >
+          {item[io]}
+        </p>
       )}
       {/* 翻訳元テキストの音声再生ボタン */}
       <Button
@@ -297,7 +305,7 @@ export const Flashcard = ({
   useEffect(() => {
     if (isGroupedView) {
       const newGroupedHistory = flashcards.reduce((acc, item) => {
-        const date = format(new Date(item.timestamp),"yyyy/MM/dd");
+        const date = format(new Date(item.timestamp), "yyyy/MM/dd");
         if (!acc[date]) {
           acc[date] = [];
         }
