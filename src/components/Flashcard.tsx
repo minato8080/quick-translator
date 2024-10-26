@@ -143,9 +143,9 @@ const CardCore = ({
                       >
                         <div className="flex items-center space-x-2 h-4">
                           {item.visible ? (
-                            <Eye className="h-4 w-4 text-blue-400" />
+                            <Eye className="h-4 w-4 text-blue-600" />
                           ) : (
-                            <EyeOff className="h-4 w-4 text-blue-200" />
+                            <EyeOff className="h-4 w-4 text-blue-400" />
                           )}
                           <Switch
                             id="text-area-toggle"
@@ -159,7 +159,7 @@ const CardCore = ({
                                 )
                               );
                             }}
-                            className="data-[state=checked]:bg-blue-400 data-[state=unchecked]:bg-blue-200"
+                            className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-blue-400"
                           />
                         </div>
                       </motion.div>

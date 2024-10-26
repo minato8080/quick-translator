@@ -58,6 +58,8 @@ export default function Vocabulary() {
         <div>
           <div className="flex justify-between items-center mb-2 m-1">
             <div className="flex">
+              {/* 日付選択コンポーネント */}
+              <DatePicker setDate={setSelectedDate} calendar={calendar} />
               {/* 検索ボタン */}
               <Button
                 variant="outline"
@@ -69,36 +71,40 @@ export default function Vocabulary() {
               >
                 <Search className="h-4 w-4" />
               </Button>
-              {/* 日付選択コンポーネント */}
-              <DatePicker setDate={setSelectedDate} calendar={calendar} />
             </div>
             <div className="flex space-x-4 ml-auto">
               <div className="flex items-center space-x-2">
                 {/* 学習モードのアイコン表示 */}
                 {isLearningMode ? (
-                  <Book className="h-4 w-4" />
+                  <Book className="h-4 w-4 text-blue-600" />
                 ) : (
-                  <Edit className="h-4 w-4" />
+                  <Edit className="h-4 w-4 text-teal-600" />
                 )}
                 {/* 学習モードの切り替えスイッチ */}
                 <Switch
                   id="learning-mode"
                   checked={isLearningMode}
                   onCheckedChange={setIsLearningMode}
+                  className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-teal-600"
                 />
               </div>
               <div className="flex items-center space-x-2">
                 {/* テキストエリアの表示/非表示アイコン */}
                 {isTextAreaVisible ? (
-                  <Eye className="h-4 w-4" />
+                  <Eye
+                    className={`h-4 w-4 text-blue-${
+                      isLearningMode ? "600" : "400"
+                    }`}
+                  />
                 ) : (
-                  <EyeOff className="h-4 w-4" />
+                  <EyeOff className="h-4 w-4 text-blue-600" />
                 )}
                 {/* テキストエリアの表示/非表示切り替えスイッチ */}
                 <Switch
                   id="text-area-toggle"
                   disabled={!isLearningMode}
                   checked={isTextAreaVisible}
+                  className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-blue-400"
                   onCheckedChange={(checked) => {
                     setIsTextAreaVisible(checked);
                     setFlashcards((prev) =>
