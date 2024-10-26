@@ -133,7 +133,7 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
     try {
       await db.vocabulary.delete(flashcards[index].timestamp);
 
-      if (!flashcards[index].saved) {
+      if (flashcards[index].saved) {
         // タイムスタンプから日付を抽出
         const date = format(
           parse(flashcards[index].timestamp, FORMAT.TIMESTAMP, new Date()),
