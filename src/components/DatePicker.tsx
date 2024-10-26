@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import { getDaysInMonth } from "date-fns";
 
 import { cn } from "@/lib/utils";
@@ -11,14 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-interface DatePickerProps {
-  date: Date;
-  setDate: React.Dispatch<React.SetStateAction<Date>>;
-  disabledYear?: boolean;
-  disabledMonth?: boolean;
-  disabledDay?: boolean;
-}
+import { Calendar } from "@/global/dexieDB";
+import { useEffect, useState } from "react";
+import { parse, format } from "date-fns";
 
 type DatePart = "year" | "month" | "day";
 
@@ -53,20 +47,22 @@ const TriStateToggle = ({
   );
 };
 
-export function DatePicker({ date, setDate }: DatePickerProps) {
+export function DatePicker({
+  setDate,
+  calendar,
+}: {
+  setDate: React.Dispatch<React.SetStateAction<string>>;
+  calendar?: Calendar[];
+}) {
   const today = new Date();
-  const [year, setYear] = React.useState(
-    date?.getFullYear() || today.getFullYear()
-  );
-  const [month, setMonth] = React.useState(
-    date?.getMonth() || today.getMonth()
-  );
-  const [day, setDay] = React.useState(date?.getDate() || today.getDate());
-  const [disabledMonth, setDisabledMonth] = React.useState(false);
-  const [disabledDay, setDisabledDay] = React.useState(false);
-  const [activePart, setActivePart] = React.useState<DatePart>("month");
+  const [year, setYear] = useState(today.getFullYear());
+  const [month, setMonth] = useState(today.getMonth());
+  const [day, setDay] = useState(today.getDate());
+  const [disabledMonth, setDisabledMonth] = useState(false);
+  const [disabledDay, setDisabledDay] = useState(false);
+  const [activePart, setActivePart] = useState<DatePart>("month");
 
-  React.useEffect(() => {
+  useEffect(() => {
     switch (activePart) {
       case "year":
         setDisabledMonth(true);
@@ -83,74 +79,139 @@ export function DatePicker({ date, setDate }: DatePickerProps) {
     }
   }, [activePart]);
 
-  const updateDate = (newYear: number, newMonth: number, newDay: number) => {
-    const newDate = new Date(newYear, newMonth, newDay);
-    setDate(newDate);
-    setYear(newDate.getFullYear());
-    setMonth(newDate.getMonth());
-    setDay(newDate.getDate());
+  useEffect(() => {
+    let conditionDate = format(new Date(year, month, day), "yyyy-MM-dd");
+    if (disabledDay)
+      conditionDate = conditionDate.split("-").slice(0, -1).join("-");
+    if (disabledMonth)
+      conditionDate = conditionDate.split("-").slice(0, -1).join("-");
+
+    setDate(conditionDate);
+  }, [year, month, day, disabledMonth, disabledDay]);
+
+  const updateDate = (mode: DatePart, newState: number) => {
+    {
+      switch (mode) {
+        case "year":
+          setYear(newState);
+          break;
+        case "month":
+          setMonth(newState);
+          break;
+        case "day":
+          setDay(newState);
+          break;
+      }
+    }
   };
 
   const years = Array.from(
     { length: 10 },
     (_, i) => new Date().getFullYear() - i
   );
-  const months = Array.from({ length: 12 }, (_, i) => i);
+  const months = Array.from({ length: 12 }, (_, i) => i + 1);
   const days = Array.from(
     { length: getDaysInMonth(new Date(year, month)) },
     (_, i) => i + 1
   );
 
+  const DatePickSelectbox = ({
+    mode,
+    items,
+    disabled,
+    digit,
+    itemWidth,
+  }: {
+    mode: DatePart;
+    items: number[];
+    disabled: boolean;
+    digit: number;
+    itemWidth: number;
+  }) => {
+    let selectVal: number;
+    switch (mode) {
+      case "year":
+        selectVal = year;
+        break;
+      case "month":
+        selectVal = month + 1;
+        break;
+      case "day":
+        selectVal = day;
+        break;
+    }
+    const hasData = (item: number) => {
+      if (!calendar) return false;
+      return calendar.some((cal) => {
+        const date = parse(cal.date, "yyyy-MM-dd", new Date());
+        switch (mode) {
+          case "year":
+            return item === date.getFullYear();
+          case "month":
+            return item - 1 === date.getMonth() && year === date.getFullYear();
+          case "day":
+            return (
+              item === date.getDate() &&
+              month === date.getMonth() &&
+              year === date.getFullYear()
+            );
+        }
+      });
+    };
+
+    return (
+      <Select
+        value={selectVal.toString()}
+        onValueChange={(value) => updateDate(mode, parseInt(value))}
+        disabled={disabled}
+      >
+        <SelectTrigger className="w-[80px]">
+          <SelectValue>{selectVal.toString().padStart(digit, "0")}</SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          {items.map((item) => (
+            <SelectItem
+              key={item}
+              value={item.toString()}
+              className={
+                hasData(item)
+                  ? `text-primary font-bold bg-indigo-200 m-1 rounded-full border-2 border-indigo-400 w-[${itemWidth}px] hover:border-indigo-600`
+                  : "m-1"
+              }
+              disabled={!hasData(item)}
+            >
+              {item.toString().padStart(digit, "0")}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    );
+  };
+
   return (
     <div className="flex flex-col space-y-2">
       <div className="flex space-x-2">
-        <Select
-          value={year.toString()}
-          onValueChange={(value) => updateDate(parseInt(value), month, day)}
-        >
-          <SelectTrigger className="w-[80px]">
-            <SelectValue>{year}</SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {years.map((y) => (
-              <SelectItem key={y} value={y.toString()}>
-                {y}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select
-          value={month.toString()}
-          onValueChange={(value) => updateDate(year, parseInt(value), day)}
+        <DatePickSelectbox
+          mode="year"
+          items={years}
+          disabled={false}
+          digit={4}
+          itemWidth={65}
+        />
+        <DatePickSelectbox
+          mode="month"
+          items={months}
           disabled={disabledMonth}
-        >
-          <SelectTrigger className="w-[80px]">
-            <SelectValue>{(month + 1).toString().padStart(2, "0")}</SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {months.map((m) => (
-              <SelectItem key={m} value={m.toString()}>
-                {(m + 1).toString().padStart(2, "0")}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select
-          value={day.toString()}
-          onValueChange={(value) => updateDate(year, month, parseInt(value))}
+          digit={2}
+          itemWidth={50}
+        />
+        <DatePickSelectbox
+          mode="day"
+          items={days}
           disabled={disabledDay}
-        >
-          <SelectTrigger className="w-[80px]">
-            <SelectValue>{(day + 1).toString().padStart(2, "0")}</SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {days.map((d) => (
-              <SelectItem key={d} value={d.toString()}>
-                {(d + 1).toString().padStart(2, "0")}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          digit={2}
+          itemWidth={50}
+        />
       </div>
       <TriStateToggle value={activePart} onChange={setActivePart} />
     </div>

@@ -62,12 +62,15 @@ export default function Vocabulary() {
               <Button
                 variant="outline"
                 size="icon"
-                className="hover:bg-gray-400"
+                className="hover:bg-gray-400 ml-2"
+                onClick={() => {
+                  setConditionDate(selectedDate);
+                }}
               >
                 <Search className="h-4 w-4" />
               </Button>
               {/* 日付選択コンポーネント */}
-              <DatePicker date={selectedDate} setDate={setSelectedDate} />
+              <DatePicker setDate={setSelectedDate} calendar={calendar} />
             </div>
             <div className="flex space-x-4 ml-auto">
               <div className="flex items-center space-x-2">
