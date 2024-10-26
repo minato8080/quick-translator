@@ -2,8 +2,9 @@ import { useState } from "react";
 
 import { useToast } from "@/hooks/use-toast";
 import { FlashcardType, ScreenMode, FORMAT } from "@/types/types";
-import { db, Vocabulary } from "@/global/dexieDB";
+import { db } from "@/global/dexieDB";
 import { format, parse } from "date-fns";
+import { TOAST_STYLE } from "@/global/style";
 
 /**
  * フラッシュカードの操作を管理するカスタムフック
@@ -71,13 +72,15 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
       );
       toast({
         title: "Translation Saved",
-        description: "The translation has been saved to your vocabulary list.",
+        description: "The translation has been saved.",
+        style: TOAST_STYLE,
       });
     } catch (error) {
       toast({
         title: "Vocabulary Addition Error",
         description: `Failed to add vocabulary: ${error}`,
         variant: "destructive",
+        style: TOAST_STYLE,
       });
     }
   };
@@ -134,14 +137,15 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
       );
       toast({
         title: "All Translations Saved",
-        description:
-          "All unsaved translations have been saved to your vocabulary list.",
+        description: "All translations have been saved.",
+        style: TOAST_STYLE,
       });
     } catch (error) {
       toast({
         title: "Save All Error",
         description: `Failed to save all translations: ${error}`,
         variant: "destructive",
+        style: TOAST_STYLE,
       });
     }
   };
@@ -182,14 +186,15 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
 
       toast({
         title: "Translation Deleted",
-        description:
-          "The translation has been removed from history and database.",
+        description: "The translation has been removed from database.",
+        style: TOAST_STYLE,
       });
     } catch (error) {
       toast({
         title: "Deletion Error",
         description: `Failed to delete translation: ${error}`,
         variant: "destructive",
+        style: TOAST_STYLE,
       });
     }
   };
@@ -207,14 +212,15 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
 
       toast({
         title: "All Translations Deleted",
-        description:
-          "All translations have been removed from history and database.",
+        description: "All translations have been removed from database.",
+        style: TOAST_STYLE,
       });
     } catch (error) {
       toast({
         title: "Deletion Error",
         description: `Failed to delete all translations: ${error}`,
         variant: "destructive",
+        style: TOAST_STYLE,
       });
     }
   };

@@ -20,6 +20,7 @@ import { Flashcard } from "@/components/Flashcard";
 import { useFlashcardHandler } from "@/hooks/useFlashcardHandler";
 import { AnimatePresence, motion } from "framer-motion";
 import { format } from "date-fns";
+import { TOAST_STYLE } from "@/global/style";
 
 export default function Translate() {
   const [inputText, setInputText] = useState("");
@@ -90,6 +91,7 @@ export default function Translate() {
           description:
             "An error occurred during translation. Please try again.",
           variant: "destructive",
+          style: TOAST_STYLE,
         });
       } finally {
         setIsTranslating(false);

@@ -16,7 +16,7 @@ export function TriStateToggle<T extends string>({
   disabled,
 }: TriStateToggleProps<T>) {
   return (
-    <div className="relative w-48 h-8 bg-gray-200 rounded-full">
+    <div className="relative w-36 h-8 bg-gray-200 rounded-full">
       <div
         className={cn(
           `absolute top-1 bottom-1 w-1/3 rounded-full transition-all duration-200 ease-in-out ${
