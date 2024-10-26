@@ -11,13 +11,17 @@ import { useFlashcardHandler } from "@/hooks/useFlashcardHandler";
 import { db } from "@/global/dexieDB";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/DatePicker";
-import { Book, Edit, Eye, EyeOff, Search, SquareX, X } from "lucide-react";
+import { Book, Edit, Eye, EyeOff, Search, SquareX } from "lucide-react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { TriStateToggle } from "@/components/TriStateToggle";
+import { LEARNING_MODES, LearningMode } from "@/types/types";
+
 
 export default function Vocabulary() {
   const flashcardHandler = useFlashcardHandler("vocabulary");
   const [isLearningMode, setIsLearningMode] = useState(true);
   const [isTextAreaVisible, setIsTextAreaVisible] = useState(true);
+  const [learningMode, setLearningMode] = useState<LearningMode>("origin");
   const [selectedDate, setSelectedDate] = useState(
     new Date().toLocaleDateString()
   );
@@ -107,13 +111,6 @@ export default function Vocabulary() {
                     onCheckedChange={(value) => {
                       handleCancelEdit();
                       setIsLearningMode(value);
-                      !value && setIsTextAreaVisible(true);
-                      !value &&
-                        setFlashcards((prev) =>
-                          prev.map((flashcard) => {
-                            return { ...flashcard, visible: true };
-                          })
-                        );
                     }}
                     className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-teal-600"
                   />
@@ -145,6 +142,12 @@ export default function Vocabulary() {
                     }}
                   />
                 </div>
+                <TriStateToggle
+                  value={!isLearningMode ? "origin" : learningMode}
+                  onChange={setLearningMode}
+                  options={LEARNING_MODES}
+                  disabled={!isLearningMode}
+                />
               </div>
             </div>
           </div>
@@ -159,6 +162,7 @@ export default function Vocabulary() {
             flashcardHandler={flashcardHandler}
             isGroupedView={true}
             isLearningMode={isLearningMode}
+            learningMode={learningMode}
           />
         </div>
       </div>

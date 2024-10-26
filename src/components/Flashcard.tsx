@@ -12,44 +12,36 @@ import { useFlashcardHandler } from "@/hooks/useFlashcardHandler";
 
 import { Volume2 } from "lucide-react";
 
-import type { FlashcardType } from "@/types/types";
+import type { FlashcardType, LearningMode } from "@/types/types";
 
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { Switch } from "./ui/switch";
 import { format } from "date-fns";
 
+type IOType = "input" | "output";
+
 /**
- * EditableTextコンポーネント
- *
- * このコンポーネントは、翻訳テキストを表示または編集するためのUIを提供します。
- *
- * @param io - テキストの種類（"input"または"output"）
- * @param item - 表示または編集するWordCardオブジェクト
- * @param index - WordCardのインデックス
+ * スピーカーボタンコンポーネント
+ * @param io - 入力または出力のタイプ
+ * @param item - フラッシュカードのアイテム
  * @param lang - 言語コード
- * @param setFlashcards - 翻訳履歴を更新するための関数
- *
- * @returns 翻訳テキストの表示または編集UI
  */
-const EditableText = ({
+const SpeakerButton = ({
   io,
   item,
   lang,
-  flashcardHandler,
 }: {
-  io: "input" | "output";
+  io: IOType;
   item: FlashcardType;
   lang: string;
-  flashcardHandler: ReturnType<typeof useFlashcardHandler>;
 }) => {
-  const { editingText, setEditingText } = flashcardHandler;
   const [isSpeaking, setIsSpeaking] = useState(false);
 
   /**
-   * テキストを音声で読み上げる関数
-   * @param text 読み上げるテキスト
-   * @param lang 言語コード
+   * テキストを音声合成で再生する
+   * @param text - 再生するテキスト
+   * @param lang - 言語コード
    */
   const handleTextToSpeech = (text: string, lang: string) => {
     const utterance = new SpeechSynthesisUtterance(text);
@@ -60,57 +52,39 @@ const EditableText = ({
   };
 
   return (
-    <div className="flex justify-between items-center mb-2">
-      {/* 翻訳元テキストの表示または編集 */}
-      {item.editing ? (
-        <Input
-          value={editingText ? editingText[io] : ""}
-          onChange={(e) =>
-            setEditingText((prev) =>
-              prev ? { ...prev, [io]: e.target.value } : null
-            )
-          }
-          className="flex-grow p-2 text-md"
-        />
-      ) : (
-        <motion.p
-          key={io === "output" && item.visible ? "visible" : "invisible"}
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className={`${
-            io === "output" && !item.visible
-              ? "text-transparent"
-              : "text-gray-800"
-          } p-2`}
-        >
-          {item[io]}
-        </motion.p>
-      )}
-      {/* 翻訳元テキストの音声再生ボタン */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => handleTextToSpeech(item[io], lang)}
-      >
-        <Volume2 className={`h-4 w-4 text-blue-${isSpeaking ? 600 : 400}`} />
-        <span className="sr-only">Listen to source text</span>
-      </Button>
-    </div>
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={() => handleTextToSpeech(item[io], lang)}
+    >
+      <Volume2 className={`h-4 w-4 text-blue-${isSpeaking ? 600 : 400}`} />
+      <span className="sr-only">Listen to source text</span>
+    </Button>
   );
 };
 
+/**
+ * カード本体コンポーネント
+ * @param flashcardHandler - フラッシュカードのハンドラー
+ * @param items - フラッシュカードのアイテムリスト
+ * @param startIndex - 開始インデックス
+ * @param isLearningMode - 学習モードかどうか
+ * @param learningMode - 学習モードのタイプ
+ */
 const CardCore = ({
   flashcardHandler,
   items,
   startIndex = 0,
   isLearningMode,
+  learningMode,
 }: {
   flashcardHandler: ReturnType<typeof useFlashcardHandler>;
   items: FlashcardType[];
   startIndex?: number;
   isLearningMode: boolean;
+  learningMode: LearningMode;
 }) => {
+  const { editingText, setEditingText } = flashcardHandler;
   const {
     setFlashcards,
     handleSaveTranslation,
@@ -118,6 +92,94 @@ const CardCore = ({
     handleEditTranslation,
     handleCancelEdit,
   } = flashcardHandler;
+
+  /**
+   * 入力または出力のタイプを切り替える
+   * @param learningMode - 学習モードのタイプ
+   * @param item - フラッシュカードのアイテム
+   * @param io - 入力または出力のタイプ
+   * @returns IOType
+   */
+  const switchIO = (
+    learningMode: LearningMode,
+    item: FlashcardType,
+    io: IOType
+  ): IOType => {
+    switch (learningMode) {
+      case "origin":
+        return io;
+      case "en-ja":
+        return (item.sourceLang === "en") === (io === "input")
+          ? "input"
+          : "output";
+      case "ja-en":
+        return (item.targetLang === "en") === (io === "input")
+          ? "input"
+          : "output";
+      default:
+        return "input";
+    }
+  };
+
+  /**
+   * スピーカーの言語を切り替える
+   * @param learningMode - 学習モードのタイプ
+   * @param item - フラッシュカードのアイテム
+   * @param io - 入力または出力のタイプ
+   * @returns string
+   */
+  const switchSpeaker = (
+    learningMode: LearningMode,
+    item: FlashcardType,
+    io: IOType
+  ) => {
+    switch (learningMode) {
+      case "origin":
+        return io === "input" ? item.sourceLang : item.targetLang;
+      case "en-ja":
+        return io === "input" ? "en" : "ja";
+      case "ja-en":
+        return io === "output" ? "en" : "ja";
+      default:
+        return "";
+    }
+  };
+
+  /**
+   * 編集可能なテキストコンポーネント
+   * @param io - 入力または出力のタイプ
+   * @param item - フラッシュカードのアイテム
+   */
+  const EditableText = ({ io, item }: { io: IOType; item: FlashcardType }) => {
+    return (
+      <>
+        {item.editing ? (
+          <Input
+            value={editingText ? editingText[io] : ""}
+            onChange={(e) =>
+              setEditingText((prev) =>
+                prev ? { ...prev, [io]: e.target.value } : null
+              )
+            }
+            className="flex-grow p-2 text-md"
+          />
+        ) : (
+          <p
+            className={`${
+              !isLearningMode
+                ? "text-gray-800"
+                : switchIO(learningMode, item, io) === "output" && !item.visible
+                ? "text-transparent"
+                : "text-gray-800"
+            } p-2`}
+          >
+            {item[io]}
+          </p>
+        )}
+      </>
+    );
+  };
+
   return (
     <>
       {items.map((item, lindex) => (
@@ -271,19 +333,29 @@ const CardCore = ({
             </CardHeader>
             <CardContent className="p-1">
               {/* 翻訳元テキストの表示または編集 */}
-              <EditableText
-                io="input"
-                item={item}
-                lang={item.sourceLang}
-                flashcardHandler={flashcardHandler}
-              />
+              <div className="flex justify-between items-center mb-2">
+                <EditableText
+                  io={switchIO(learningMode, item, "input")}
+                  item={item}
+                />
+                <SpeakerButton
+                  io={switchIO(learningMode, item, "input")}
+                  item={item}
+                  lang={switchSpeaker(learningMode, item, "input")}
+                />
+              </div>
               {/* 翻訳先テキストの表示または編集 */}
-              <EditableText
-                io="output"
-                item={item}
-                lang={item.targetLang}
-                flashcardHandler={flashcardHandler}
-              />
+              <div className="flex justify-between items-center mb-2">
+                <EditableText
+                  io={switchIO(learningMode, item, "output")}
+                  item={item}
+                />
+                <SpeakerButton
+                  io={switchIO(learningMode, item, "output")}
+                  item={item}
+                  lang={switchSpeaker(learningMode, item, "output")}
+                />
+              </div>
             </CardContent>
           </Card>
         </motion.div>
@@ -292,14 +364,23 @@ const CardCore = ({
   );
 };
 
+/**
+ * フラッシュカードコンポーネント
+ * @param flashcardHandler - フラッシュカードのハンドラー
+ * @param isGroupedView - グループ化されたビューかどうか
+ * @param isLearningMode - 学習モードかどうか
+ * @param learningMode - 学習モードのタイプ
+ */
 export const Flashcard = ({
   flashcardHandler,
   isGroupedView,
   isLearningMode = false,
+  learningMode,
 }: {
   flashcardHandler: ReturnType<typeof useFlashcardHandler>;
   isGroupedView: boolean;
   isLearningMode?: boolean;
+  learningMode: LearningMode;
 }) => {
   const { flashcards } = flashcardHandler;
   const [groupedHistory, setGroupedHistory] = useState<
@@ -345,6 +426,7 @@ export const Flashcard = ({
                   return index;
                 })()}
                 isLearningMode={isLearningMode}
+                learningMode={learningMode}
               />
             </motion.div>
           )))()
@@ -353,6 +435,7 @@ export const Flashcard = ({
           items={flashcards}
           flashcardHandler={flashcardHandler}
           isLearningMode={isLearningMode}
+          learningMode={learningMode}
         />
       )}
     </AnimatePresence>

@@ -170,6 +170,7 @@ export default function Translate() {
           <Flashcard
             flashcardHandler={flashcardHandler}
             isGroupedView={false}
+            learningMode={"origin"}
           />
         </div>
       </div>
