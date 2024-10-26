@@ -11,7 +11,8 @@ import { useFlashcardHandler } from "@/hooks/useFlashcardHandler";
 import { db } from "@/global/dexieDB";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/DatePicker";
-import { Book, Edit, Eye, EyeOff, Search } from "lucide-react";
+import { Book, Edit, Eye, EyeOff, Search, SquareX, X } from "lucide-react";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 export default function Vocabulary() {
   const flashcardHandler = useFlashcardHandler("vocabulary");
@@ -23,7 +24,8 @@ export default function Vocabulary() {
   const [conditionDate, setConditionDate] = useState(
     new Date().getFullYear().toString()
   );
-  const { setFlashcards, handleCancelEdit } = flashcardHandler;
+  const { setFlashcards, handleCancelEdit, handleDeleteAllTranslations } =
+    flashcardHandler;
   const vocabulary = useLiveQuery(async () => {
     return await db.vocabulary
       ?.where("timestamp")
@@ -72,57 +74,77 @@ export default function Vocabulary() {
                 <Search className="h-4 w-4" />
               </Button>
             </div>
-            <div className="flex space-x-4 ml-auto">
-              <div className="flex items-center space-x-2">
-                {/* 学習モードのアイコン表示 */}
-                {isLearningMode ? (
-                  <Book className="h-4 w-4 text-blue-600" />
-                ) : (
-                  <Edit className="h-4 w-4 text-teal-600" />
-                )}
-                {/* 学習モードの切り替えスイッチ */}
-                <Switch
-                  id="learning-mode"
-                  checked={isLearningMode}
-                  onCheckedChange={(value) => {
-                    handleCancelEdit();
-                    setIsLearningMode(value);
-                    !value && setIsTextAreaVisible(true);
-                    !value && setFlashcards((prev) =>
-                      prev.map((flashcard) => {
-                        return { ...flashcard, visible: true };
-                      })
-                    );
-                  }}
-                  className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-teal-600"
-                />
-              </div>
-              <div className="flex items-center space-x-2">
-                {/* テキストエリアの表示/非表示アイコン */}
-                {isTextAreaVisible ? (
-                  <Eye
-                    className={`h-4 w-4 text-blue-${
-                      isLearningMode ? "600" : "400"
-                    }`}
+            <div className="flex ml-auto">
+              {/* 翻訳の削除ボタン */}
+              {!isLearningMode ? (
+                <ConfirmDialog
+                  title="Delete all displayed cards?"
+                  description="Are you sure you want to delete all the cards currently displayed?"
+                  ok="OK"
+                >
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDeleteAllTranslations(conditionDate)}
+                  >
+                    <SquareX className="h-4 w-4 text-pink-600" />
+                    <span className="sr-only">Delete translation</span>
+                  </Button>
+                </ConfirmDialog>
+              ) : null}
+              <div className="flex space-x-4 ml-auto">
+                <div className="flex items-center space-x-2">
+                  {/* 学習モードのアイコン表示 */}
+                  {isLearningMode ? (
+                    <Book className="h-4 w-4 text-blue-600" />
+                  ) : (
+                    <Edit className="h-4 w-4 text-teal-600" />
+                  )}
+                  {/* 学習モードの切り替えスイッチ */}
+                  <Switch
+                    id="learning-mode"
+                    checked={isLearningMode}
+                    onCheckedChange={(value) => {
+                      handleCancelEdit();
+                      setIsLearningMode(value);
+                      !value && setIsTextAreaVisible(true);
+                      !value &&
+                        setFlashcards((prev) =>
+                          prev.map((flashcard) => {
+                            return { ...flashcard, visible: true };
+                          })
+                        );
+                    }}
+                    className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-teal-600"
                   />
-                ) : (
-                  <EyeOff className="h-4 w-4 text-blue-600" />
-                )}
-                {/* テキストエリアの表示/非表示切り替えスイッチ */}
-                <Switch
-                  id="text-area-toggle"
-                  disabled={!isLearningMode}
-                  checked={isTextAreaVisible}
-                  className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-blue-400"
-                  onCheckedChange={(checked) => {
-                    setIsTextAreaVisible(checked);
-                    setFlashcards((prev) =>
-                      prev.map((flashcard) => {
-                        return { ...flashcard, visible: checked };
-                      })
-                    );
-                  }}
-                />
+                </div>
+                <div className="flex items-center space-x-2">
+                  {/* テキストエリアの表示/非表示アイコン */}
+                  {isTextAreaVisible ? (
+                    <Eye
+                      className={`h-4 w-4 text-blue-${
+                        isLearningMode ? "600" : "400"
+                      }`}
+                    />
+                  ) : (
+                    <EyeOff className="h-4 w-4 text-blue-600" />
+                  )}
+                  {/* テキストエリアの表示/非表示切り替えスイッチ */}
+                  <Switch
+                    id="text-area-toggle"
+                    disabled={!isLearningMode}
+                    checked={isTextAreaVisible}
+                    className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-blue-400"
+                    onCheckedChange={(checked) => {
+                      setIsTextAreaVisible(checked);
+                      setFlashcards((prev) =>
+                        prev.map((flashcard) => {
+                          return { ...flashcard, visible: checked };
+                        })
+                      );
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </div>

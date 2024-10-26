@@ -195,6 +195,31 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
   };
 
   /**
+   * すべての表示中の翻訳を削除する関数
+   */
+  const handleDeleteAllTranslations = async (condition: string) => {
+    handleCancelEdit();
+    try {
+      // データベースから削除
+      await db.vocabulary.where("timestamp").startsWith(condition).delete();
+      // カレンダーから削除
+      await db.calendar.where("date").startsWith(condition).delete();
+
+      toast({
+        title: "All Translations Deleted",
+        description:
+          "All translations have been removed from history and database.",
+      });
+    } catch (error) {
+      toast({
+        title: "Deletion Error",
+        description: `Failed to delete all translations: ${error}`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  /**
    * 翻訳を編集モードにする関数
    * @param index 編集する翻訳のインデックス
    */
@@ -228,6 +253,7 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
     handleSaveAllTranslations,
     handleSaveTranslation,
     handleDeleteTranslation,
+    handleDeleteAllTranslations,
     handleEditTranslation,
     handleCancelEdit,
   };
