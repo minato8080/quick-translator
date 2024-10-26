@@ -99,19 +99,19 @@ export const Header = ({
   useEffect(() => {
     const animateQuick = async () => {
       await quickControls.start({
-        rotate: 360 * 4,
-        transition: { duration: 1, ease: "easeInOut" },
+        rotate: 360 * 3,
+        transition: { duration: 0.6, ease: "easeInOut" },
       });
       await quickControls.start({
-        rotate: 360 * 4,
-        transition: { duration: -2, ease: "easeOut" },
+        rotate: 360 * 3,
+        transition: { duration: 1.2, ease: "easeOut" },
       });
     };
     animateQuick();
   }, [quickControls]);
 
   return (
-    <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
+    <div className="bg-blue-600 text-white p-2 pr-4 pl-4 flex justify-between items-center">
       {/* アプリケーションのタイトル */}
       <h1 className="text-2xl font-bold flex items-center">
         <motion.span animate={quickControls} className="inline-block mr-2">
