@@ -14,7 +14,8 @@ import { DatePicker } from "@/components/DatePicker";
 import { Book, Edit, Eye, EyeOff, Search, SquareX } from "lucide-react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { TriStateToggle } from "@/components/TriStateToggle";
-import { LEARNING_MODES, LearningMode } from "@/types/types";
+import { FORMAT, LEARNING_MODES, LearningMode } from "@/types/types";
+import { format } from "date-fns";
 
 export default function Vocabulary() {
   const flashcardHandler = useFlashcardHandler("vocabulary");
@@ -25,7 +26,7 @@ export default function Vocabulary() {
     new Date().toLocaleDateString()
   );
   const [conditionDate, setConditionDate] = useState(
-    new Date().getFullYear().toString()
+    format(new Date(), FORMAT.DATE)
   );
   const { setFlashcards, handleCancelEdit, handleDeleteAllTranslations } =
     flashcardHandler;
@@ -39,6 +40,16 @@ export default function Vocabulary() {
   const calendar = useLiveQuery(async () => {
     return await db.calendar?.toArray();
   });
+  useEffect(() => {
+    if (calendar && calendar.length > 0) {
+      const latestDate = calendar
+        .map((entry) => entry.date)
+        .sort()
+        .reverse()[0];
+      setConditionDate(latestDate.slice(0, 7));
+      setSelectedDate(latestDate);
+    }
+  }, [calendar]);
 
   useEffect(() => {
     setFlashcards(

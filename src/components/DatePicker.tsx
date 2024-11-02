@@ -96,7 +96,7 @@ export function DatePicker({
           setYear(newState);
           break;
         case "month":
-          setMonth(newState);
+        setMonth(newState - 1);
           break;
         case "day":
           setDay(newState);
