@@ -6,6 +6,7 @@ import axios from "axios";
 import { ArrowRightLeft, Loader2 } from "lucide-react";
 
 import type {
+  DeepLTranslateAPIRequest,
   GoogleTranslateAPIRequest,
   GoogleTranslateAPIResponse,
   LanguagesKeys,
@@ -53,9 +54,9 @@ export default function Translate() {
   ): Promise<string> => {
     try {
       const params: GoogleTranslateAPIRequest = {
-            text,
-            source: sourceLang,
-            target: targetLang,
+        text,
+        source: sourceLang,
+        target: targetLang,
       };
       const response = await axios.get<GoogleTranslateAPIResponse>(
         "/api/translate/google",
@@ -69,6 +70,36 @@ export default function Translate() {
       }
 
       return response.data.text;
+    } catch (error) {
+      console.error("Failed to call the translation API:", error);
+      showAlert("error", "Error", "Failed to call the translation API.");
+      return "";
+    }
+  };
+
+  /**
+   * 高精度の翻訳関数
+   * @param text 翻訳するテキスト
+   * @param sourceLang ソース言語
+   * @param targetLang ターゲット言語
+   * @returns 翻訳されたテキスト
+   */
+  const translateWithDeepL = async (
+    text: string,
+    sourceLang: LanguagesKeys,
+    targetLang: LanguagesKeys
+  ): Promise<string> => {
+    try {
+      const params: DeepLTranslateAPIRequest = {
+        text,
+        source_lang: sourceLang,
+        target_lang: targetLang !== "en" ? targetLang : "en-US",
+      };
+      const response = await axios.post<string>("/api/translate/deepl", {
+        params,
+      });
+
+      return response.data;
     } catch (error) {
       console.error("Failed to call the translation API:", error);
       showAlert("error", "Error", "Failed to call the translation API.");
@@ -115,6 +146,30 @@ export default function Translate() {
 
     return () => clearTimeout(translateTimeout);
   }, [handleTranslation]);
+
+  /**
+   * 高精度の翻訳を実行する関数
+   */
+  const handlePreciseTranslation = async () => {
+    setIsTranslating(true);
+    try {
+      const result = await translateWithDeepL(
+        inputText,
+        sourceLang,
+        targetLang
+      );
+      setTranslatedText(result);
+    } catch {
+      toast({
+        title: "Translation Error",
+        description: "An error occurred during translation. Please try again.",
+        variant: "destructive",
+        style: TOAST_STYLE,
+      });
+    } finally {
+      setIsTranslating(false);
+    }
+  };
 
   /**
    * 入力テキスト、翻訳結果をクリアする関数
@@ -256,6 +311,16 @@ export default function Translate() {
             )}
           </div>
           <div className="flex justify-end mt-2 space-x-4">
+            {/* 高精度の翻訳を行うボタン */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="hover:bg-gray-600 text-[14px] w-20"
+              onClick={handlePreciseTranslation}
+              disabled={inputText === "" || isTranslating}
+            >
+              Rethink
+            </Button>
             {/* 全ての翻訳を保存するボタン */}
             <ConfirmDialog title="Save all results to vocabulary?" ok="Save">
               <Button

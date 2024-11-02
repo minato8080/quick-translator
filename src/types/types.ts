@@ -1,3 +1,4 @@
+import { SourceLanguageCode, TargetLanguageCode } from "deepl-node";
 
 /**
  * 言語キーの型
@@ -49,6 +50,15 @@ export type GoogleTranslateAPIRequest = {
 };
 
 /**
+ * DeepL Translate APIのリクエスト型
+ */
+export type DeepLTranslateAPIRequest = {
+  text: string;
+  source_lang: SourceLanguageCode | null;
+  target_lang: TargetLanguageCode;
+};
+
+/**
  * 日付フォーマット
  */
 export const FORMAT = {
@@ -64,4 +74,4 @@ export const LEARNING_MODES = ["origin", "en-ja", "ja-en"] as const;
 /**
  * 学習モードの型
  */
-export type LearningMode = typeof LEARNING_MODES[number];
+export type LearningMode = (typeof LEARNING_MODES)[number];
