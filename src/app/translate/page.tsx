@@ -26,6 +26,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { format } from "date-fns";
 import { TOAST_STYLE } from "@/global/style";
 
+/**
+ * 翻訳コンポーネント
+ * @returns 翻訳機能を提供するReactコンポーネント
+ */
 export default function Translate() {
   const [inputText, setInputText] = useState("");
   const [translatedText, setTranslatedText] = useState("");

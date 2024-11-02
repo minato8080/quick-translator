@@ -17,6 +17,11 @@ import { TriStateToggle } from "@/components/TriStateToggle";
 import { FORMAT, LEARNING_MODES, LearningMode } from "@/types/types";
 import { format } from "date-fns";
 
+/**
+ * ボキャブラリーページコンポーネント
+ * ユーザーが保存したボキャブラリーを表示し、管理するためのページ
+ * @returns ボキャブラリーページのReactコンポーネント
+ */
 export default function Vocabulary() {
   const flashcardHandler = useFlashcardHandler("vocabulary");
   const [isLearningMode, setIsLearningMode] = useState(true);
