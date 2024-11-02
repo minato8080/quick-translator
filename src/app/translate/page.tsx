@@ -114,6 +114,14 @@ export default function Translate() {
   }, [handleTranslation]);
 
   /**
+   * 入力テキスト、翻訳結果をクリアする関数
+   */
+  const handleClear = () => {
+    setInputText("");
+    setTranslatedText("");
+  };
+
+  /**
    * ソース言語とターゲット言語を入れ替える関数
    */
   const handleSwapLanguages = () => {
@@ -260,6 +268,16 @@ export default function Translate() {
                 Save All
               </Button>
             </ConfirmDialog>
+            {/* クリアボタン */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="hover:bg-gray-600 text-[14px] w-20"
+              onClick={handleClear}
+              disabled={inputText === "" && translatedText === ""}
+            >
+              Clear
+            </Button>
             {/* 翻訳履歴に追加するボタン */}
             <Button
               variant="outline"
