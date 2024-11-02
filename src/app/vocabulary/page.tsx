@@ -172,7 +172,9 @@ export default function Vocabulary() {
           className="p-2 pt-0 overflow-y-auto"
           style={{
             maxHeight: `calc(100vh - 56px - ${
-              window.innerWidth > 603 ? 65 : 104
+              typeof window !== "undefined" && window.innerWidth > 603
+                ? 65
+                : 104
             }px)`,
           }}
         >
