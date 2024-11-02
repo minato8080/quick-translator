@@ -1,15 +1,16 @@
-/**
- * 使用可能な言語のリスト
- */
-export const languages = {
-  en: "English",
-  ja: "日本語",
-} as const;
 
 /**
  * 言語キーの型
  */
-export type LanguagesKeys = keyof typeof languages;
+export type LanguagesKeys = "en" | "ja";
+
+/**
+ * 使用可能な言語のリスト
+ */
+export const languages: Record<LanguagesKeys, string> = {
+  en: "English",
+  ja: "日本語",
+} as const;
 
 /**
  * 画面モードの型
@@ -36,6 +37,15 @@ export type FlashcardType = {
 export type GoogleTranslateAPIResponse = {
   code: 200 | 400;
   text: string;
+};
+
+/**
+ * Google Translate APIのリクエスト型
+ */
+export type GoogleTranslateAPIRequest = {
+  text: string;
+  source: LanguagesKeys;
+  target: LanguagesKeys;
 };
 
 /**

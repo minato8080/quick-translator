@@ -5,10 +5,13 @@ import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { ArrowRightLeft, Loader2 } from "lucide-react";
 
-import { ConfirmDialog } from "../../components/ConfirmDialog";
+import type {
+  GoogleTranslateAPIRequest,
+  GoogleTranslateAPIResponse,
+  LanguagesKeys,
+} from "@/types/types";
 
-import type { GoogleTranslateAPIResponse, LanguagesKeys } from "@/types/types";
-
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -43,33 +46,29 @@ export default function Translate() {
    * @param targetLang ターゲット言語
    * @returns 翻訳されたテキスト
    */
-  const translateText = async (
+  const translateWithGoogle = async (
     text: string,
-    sourceLang: string,
-    targetLang: string
+    sourceLang: LanguagesKeys,
+    targetLang: LanguagesKeys
   ): Promise<string> => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_GOOGLE_TRANSLATE_API;
-      if (!apiUrl) {
-        throw new Error("Google Translate API URL is not defined.");
-      }
-      const response: GoogleTranslateAPIResponse = (
-        await axios.get(apiUrl, {
-          params: {
+      const params: GoogleTranslateAPIRequest = {
             text,
             source: sourceLang,
             target: targetLang,
-          },
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        })
-      ).data;
-      if (response.code !== 200) {
-        throw new Error(response.text);
+      };
+      const response = await axios.get<GoogleTranslateAPIResponse>(
+        "/api/translate/google",
+        {
+          params,
+        }
+      );
+
+      if (response.data.code !== 200) {
+        throw new Error(response.data.text);
       }
-      return response.text;
+
+      return response.data.text;
     } catch (error) {
       console.error("Failed to call the translation API:", error);
       showAlert("error", "Error", "Failed to call the translation API.");
@@ -83,7 +82,11 @@ export default function Translate() {
   const handleTranslation = useCallback(async () => {
     if (inputText) {
       try {
-        const result = await translateText(inputText, sourceLang, targetLang);
+        const result = await translateWithGoogle(
+          inputText,
+          sourceLang,
+          targetLang
+        );
         setTranslatedText(result);
       } catch {
         toast({
@@ -258,7 +261,7 @@ export default function Translate() {
               <Button
                 variant="outline"
                 size="sm"
-                className="hover:bg-gray-600 text-[14px]"
+                className="hover:bg-gray-600 text-[14px] w-20"
                 disabled={
                   flashcards.length === 0 ||
                   flashcards.every((elem) => elem.saved)
@@ -282,7 +285,7 @@ export default function Translate() {
             <Button
               variant="outline"
               size="sm"
-              className="hover:bg-gray-600 text-[14px]"
+              className="hover:bg-gray-600 text-[14px] w-20"
               onClick={handleAddToHistory}
               disabled={inputText === ""}
             >
