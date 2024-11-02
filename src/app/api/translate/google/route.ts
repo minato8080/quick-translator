@@ -3,12 +3,12 @@ import { isDynamicServerError } from "next/dist/client/components/hooks-server-c
 export const runtime = "nodejs";
 
 export async function GET(request: Request): Promise<Response> {
-  const apiUrl = process.env.GOOGLE_TRANSLATE_API;
-  if (!apiUrl) {
-    throw new Error("Google Translate API URL is not defined.");
-  }
-
   try {
+    const apiUrl = process.env.GOOGLE_TRANSLATE_API;
+    if (!apiUrl) {
+      throw new Error("Google Translate API URL is not defined.");
+    }
+    
     const fetchResponse = await fetch(
       `${apiUrl}?${new URL(request.url).searchParams}`,
       {

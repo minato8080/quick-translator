@@ -6,11 +6,12 @@ import * as deepl from "deepl-node";
 export const runtime = "nodejs";
 
 export async function POST(request: Request): Promise<Response> {
-  const apiKey = process.env.DEEPL_API_KEY;
-  if (!apiKey) {
-    throw new Error("Google Translate API URL is not defined.");
-  }
   try {
+    const apiKey = process.env.DEEPL_API_KEY;
+    if (!apiKey) {
+      throw new Error("Google Translate API URL is not defined.");
+    }
+    
     const translator = new deepl.Translator(apiKey);
 
     const { text, source_lang, target_lang }: DeepLTranslateAPIRequest = (
