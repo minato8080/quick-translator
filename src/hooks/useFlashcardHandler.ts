@@ -27,8 +27,8 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
       let updatedFlashcards = flashcards;
       // 編集中のテキストが存在する場合、フラッシュカードのリストを更新
       if (editingText) {
-        updatedFlashcards = flashcards.map((item, i) =>
-          i === editingText.index ? editingText : item
+        updatedFlashcards = flashcards.map((item) =>
+          item.timestamp === editingText.timestamp ? editingText : item
         );
       }
       // 更新されたフラッシュカードをデータベースに保存
@@ -94,8 +94,8 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
       let updatedFlashcards = flashcards;
       // 編集中のテキストが存在する場合、フラッシュカードのリストを更新
       if (editingText) {
-        updatedFlashcards = flashcards.map((item, i) =>
-          i === editingText.index ? editingText : item
+        updatedFlashcards = flashcards.map((item) =>
+          item.timestamp === editingText.timestamp ? editingText : item
         );
       }
       const unsavedFlashcards = updatedFlashcards

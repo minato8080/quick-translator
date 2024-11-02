@@ -37,8 +37,12 @@ export default function Translate() {
   const { showAlert } = useAlertPopup();
 
   const flashcardHandler = useFlashcardHandler("translate");
-  const { flashcards, setFlashcards, handleSaveAllTranslations } =
-    flashcardHandler;
+  const {
+    flashcards,
+    setFlashcards,
+    handleSaveAllTranslations,
+    handleCancelEdit,
+  } = flashcardHandler;
 
   /**
    * 翻訳関数
@@ -195,6 +199,7 @@ export default function Translate() {
    */
   const handleAddToHistory = () => {
     if (inputText && translatedText && !isTranslating) {
+      handleCancelEdit();
       setFlashcards((prev) => [
         {
           input: inputText,
