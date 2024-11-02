@@ -3,15 +3,18 @@ import { isDynamicServerError } from "next/dist/client/components/hooks-server-c
 import { DeepLTranslateAPIRequest } from "@/types/types";
 import * as deepl from "deepl-node";
 
+export const dynamic = 'force-dynamic'; // static by default, unless reading the request
 export const runtime = "nodejs";
 
 export async function POST(request: Request): Promise<Response> {
   try {
     const apiKey = process.env.DEEPL_API_KEY;
     if (!apiKey) {
-      throw new Error("Google Translate API URL is not defined.");
+      const msg = "DeepL API key is not defined.";
+      console.error(msg);
+      throw new Error(msg);
     }
-    
+
     const translator = new deepl.Translator(apiKey);
 
     const { text, source_lang, target_lang }: DeepLTranslateAPIRequest = (
@@ -28,6 +31,7 @@ export async function POST(request: Request): Promise<Response> {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
+    console.error("Error during DeepL translation:", error);
     if (isDynamicServerError(error)) {
       throw error;
     }

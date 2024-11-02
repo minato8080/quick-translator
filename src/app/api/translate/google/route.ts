@@ -1,14 +1,17 @@
 import { isDynamicServerError } from "next/dist/client/components/hooks-server-context";
 
+export const dynamic = 'force-dynamic'; // static by default, unless reading the request
 export const runtime = "nodejs";
 
 export async function GET(request: Request): Promise<Response> {
   try {
     const apiUrl = process.env.GOOGLE_TRANSLATE_API;
     if (!apiUrl) {
-      throw new Error("Google Translate API URL is not defined.");
+      const msg = "Google Translate API URL is not defined.";
+      console.error(msg);
+      throw new Error(msg);
     }
-    
+
     const fetchResponse = await fetch(
       `${apiUrl}?${new URL(request.url).searchParams}`,
       {
@@ -27,6 +30,7 @@ export async function GET(request: Request): Promise<Response> {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
+    console.error("Error during DeepL translation:", error);
     if (isDynamicServerError(error)) {
       throw error;
     }
