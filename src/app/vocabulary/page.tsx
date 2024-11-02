@@ -16,7 +16,6 @@ import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { TriStateToggle } from "@/components/TriStateToggle";
 import { LEARNING_MODES, LearningMode } from "@/types/types";
 
-
 export default function Vocabulary() {
   const flashcardHandler = useFlashcardHandler("vocabulary");
   const [isLearningMode, setIsLearningMode] = useState(true);
@@ -155,7 +154,11 @@ export default function Vocabulary() {
         </div>
         <div
           className="p-2 pt-0 overflow-y-auto"
-          style={{ height: "calc(100vh - 56px - 45px)" }}
+          style={{
+            maxHeight: `calc(100vh - 56px - ${
+              window.innerWidth > 603 ? 65 : 104
+            }px)`,
+          }}
         >
           {/* 翻訳履歴の表示 */}
           <Flashcard
