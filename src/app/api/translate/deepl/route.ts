@@ -1,7 +1,7 @@
+import * as deepl from "deepl-node";
 import { isDynamicServerError } from "next/dist/client/components/hooks-server-context";
 
-import { DeepLTranslateAPIRequest } from "@/types/types";
-import * as deepl from "deepl-node";
+import type { DeepLTranslateAPIRequest } from "@/types/types";
 
 export const dynamic = 'force-dynamic'; // static by default, unless reading the request
 export const runtime = "nodejs";

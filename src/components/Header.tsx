@@ -1,6 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
+import { motion, useAnimation } from "framer-motion";
 import { ArrowRightLeft, Menu, Book } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -9,9 +13,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useRouter } from "next/navigation";
-import { motion, useAnimation } from "framer-motion";
-import { useEffect, useState } from "react";
 
 /**
  * テキストをアニメーションで表示するコンポーネント
@@ -69,6 +70,7 @@ const TranslateAnimation = ({
     if (displayText === "") {
       setCurrentTitle(japanese);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [displayText]);
 
   return (

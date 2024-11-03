@@ -2,20 +2,22 @@
 
 import { useEffect, useState } from "react";
 
-import { useLiveQuery } from "dexie-react-hooks";
-
-import { Header } from "@/components/Header";
-import { Flashcard } from "@/components/Flashcard";
-import { Switch } from "@/components/ui/switch";
-import { useFlashcardHandler } from "@/hooks/useFlashcardHandler";
-import { db } from "@/global/dexieDB";
-import { Button } from "@/components/ui/button";
-import { DatePicker } from "@/components/DatePicker";
-import { Book, Edit, Eye, EyeOff, Search, SquareX } from "lucide-react";
-import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { TriStateToggle } from "@/components/TriStateToggle";
-import { FORMAT, LEARNING_MODES, LearningMode } from "@/types/types";
 import { format } from "date-fns";
+import { useLiveQuery } from "dexie-react-hooks";
+import { Book, Edit, Eye, EyeOff, Search, SquareX } from "lucide-react";
+
+import type { LearningMode } from "@/types/types";
+
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { DatePicker } from "@/components/DatePicker";
+import { Flashcard } from "@/components/Flashcard";
+import { Header } from "@/components/Header";
+import { TriStateToggle } from "@/components/TriStateToggle";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { db } from "@/global/dexieDB";
+import { useFlashcardHandler } from "@/hooks/useFlashcardHandler";
+import { FORMAT, LEARNING_MODES } from "@/types/types";
 
 /**
  * ボキャブラリーページコンポーネント
@@ -67,6 +69,7 @@ export default function Vocabulary() {
           }))
         : []
     );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vocabulary]);
 
   return (

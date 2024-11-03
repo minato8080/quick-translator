@@ -1,22 +1,26 @@
 "use client";
 
+import type { SetStateAction} from "react";
+import { useEffect, useState } from "react";
+
+import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, RotateCcw, Save, Edit, Check, Eye, EyeOff } from "lucide-react";
+import { Volume2 } from "lucide-react";
+
+import { Switch } from "./ui/switch";
+
+import type { useFlashcardHandler } from "@/hooks/useFlashcardHandler";
+import type { FlashcardType, LearningMode } from "@/types/types";
 
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { languages } from "@/types/types";
-import { useFlashcardHandler } from "@/hooks/useFlashcardHandler";
 
-import { Volume2 } from "lucide-react";
 
-import type { FlashcardType, LearningMode } from "@/types/types";
 
-import { SetStateAction, useEffect, useState } from "react";
-import { Switch } from "./ui/switch";
-import { format } from "date-fns";
+
 
 type IOType = "input" | "output";
 
@@ -427,6 +431,7 @@ export const Flashcard = ({
       }, {} as Record<string, typeof flashcards>);
       setGroupedHistory(newGroupedHistory);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [flashcards]);
 
   return (

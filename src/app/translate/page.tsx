@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 
 import axios from "axios";
+import { format } from "date-fns";
+import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRightLeft, Loader2 } from "lucide-react";
 
 import type {
@@ -13,18 +15,16 @@ import type {
 } from "@/types/types";
 
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { Flashcard } from "@/components/Flashcard";
+import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { TOAST_STYLE } from "@/global/style";
 import { useToast } from "@/hooks/use-toast";
 import { useAlertPopup } from "@/hooks/useAlertPopup";
-import { languages, FORMAT } from "@/types/types";
-import { Header } from "@/components/Header";
-import { Flashcard } from "@/components/Flashcard";
 import { useFlashcardHandler } from "@/hooks/useFlashcardHandler";
-import { AnimatePresence, motion } from "framer-motion";
-import { format } from "date-fns";
-import { TOAST_STYLE } from "@/global/style";
+import { languages, FORMAT } from "@/types/types";
 
 /**
  * 翻訳コンポーネント

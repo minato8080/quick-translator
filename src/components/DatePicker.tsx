@@ -1,8 +1,12 @@
 "use client";
 
-import { getDaysInMonth } from "date-fns";
+import { useEffect, useState } from "react";
 
-import { cn } from "@/lib/utils";
+import { getDaysInMonth } from "date-fns";
+import { parse, format } from "date-fns";
+
+import type { Calendar } from "@/global/dexieDB";
+
 import {
   Select,
   SelectContent,
@@ -10,9 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar } from "@/global/dexieDB";
-import { useEffect, useState } from "react";
-import { parse, format } from "date-fns";
+import { cn } from "@/lib/utils";
+
 
 type DatePart = "year" | "month" | "day";
 
@@ -103,6 +106,7 @@ export function DatePicker({
       conditionDate = conditionDate.split("-").slice(0, -1).join("-");
 
     setDate(conditionDate);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [year, month, day, disabledMonth, disabledDay]);
 
   /**

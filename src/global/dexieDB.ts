@@ -1,5 +1,6 @@
-import { LanguagesKeys } from "@/types/types";
 import Dexie, { type EntityTable } from "dexie";
+
+import type { LanguagesKeys } from "@/types/types";
 
 /**
  * 単語帳のエントリを表す型

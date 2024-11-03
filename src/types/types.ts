@@ -1,4 +1,4 @@
-import { SourceLanguageCode, TargetLanguageCode } from "deepl-node";
+import type { SourceLanguageCode, TargetLanguageCode } from "deepl-node";
 
 /**
  * 言語キーの型

@@ -1,10 +1,14 @@
 import { useState } from "react";
 
-import { useToast } from "@/hooks/use-toast";
-import { FlashcardType, ScreenMode, FORMAT } from "@/types/types";
-import { db } from "@/global/dexieDB";
 import { format, parse } from "date-fns";
+
+import type { FlashcardType, ScreenMode} from "@/types/types";
+
+import { db } from "@/global/dexieDB";
 import { TOAST_STYLE } from "@/global/style";
+import { useToast } from "@/hooks/use-toast";
+import { FORMAT } from "@/types/types";
+
 
 /**
  * フラッシュカードの操作を管理するカスタムフック
@@ -119,7 +123,7 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
           )
         )
       );
-      for (let date of dates) {
+      for (const date of dates) {
         // 同じ日付のエントリー数をカウント
         const sameDateEntries = await db.vocabulary
           .where("timestamp")
