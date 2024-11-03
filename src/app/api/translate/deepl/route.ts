@@ -30,7 +30,10 @@ export async function POST(request: Request): Promise<Response> {
     });
 
     if (!fetchResponse.ok) {
-      throw new Error("Failed to fetch translation");
+      return new Response("Failed to fetch translation.", {
+        status: fetchResponse.status,
+        statusText: fetchResponse.statusText,
+      });
     }
 
     const json: DeepLTranslateAPIResponse = await fetchResponse.json();
@@ -47,6 +50,6 @@ export async function POST(request: Request): Promise<Response> {
       throw error;
     }
     // 動的サーバーエラー以外のサーバー側エラー
-    return new Response(`Internal Server Error:${error}`, { status: 500 });
+    return new Response(`Internal Server Error : ${error}`, { status: 500 });
   }
 }

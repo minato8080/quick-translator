@@ -1,6 +1,7 @@
 import { isDynamicServerError } from "next/dist/client/components/hooks-server-context";
 
-export const dynamic = 'force-dynamic'; // static by default, unless reading the request
+// envを使用するため動的に強制
+export const dynamic = "force-dynamic";
 export const runtime = "edge";
 
 export async function GET(request: Request): Promise<Response> {
@@ -22,7 +23,10 @@ export async function GET(request: Request): Promise<Response> {
     );
 
     if (!fetchResponse.ok) {
-      throw new Error("Failed to fetch translation");
+      return new Response("Failed to fetch translation.", {
+        status: fetchResponse.status,
+        statusText: fetchResponse.statusText,
+      });
     }
 
     return new Response(await fetchResponse.text(), {
@@ -34,6 +38,6 @@ export async function GET(request: Request): Promise<Response> {
       throw error;
     }
     // 動的サーバーエラー以外のサーバー側エラー
-    return new Response("Internal Server Error", { status: 500 });
+    return new Response(`Internal Server Error : ${error}`, { status: 500 });
   }
 }
