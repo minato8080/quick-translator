@@ -4,7 +4,7 @@ import type { DeepLTranslateAPIResponse } from "@/types/types";
 
 // envを使用するため動的に強制
 export const dynamic = "force-dynamic";
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 export async function POST(request: Request): Promise<Response> {
   try {
