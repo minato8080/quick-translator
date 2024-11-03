@@ -1,10 +1,10 @@
-import * as deepl from "deepl-node";
 import { isDynamicServerError } from "next/dist/client/components/hooks-server-context";
 
-import type { DeepLTranslateAPIRequest } from "@/types/types";
+import type { DeepLTranslateAPIResponse } from "@/types/types";
 
-export const dynamic = 'force-dynamic'; // static by default, unless reading the request
-export const runtime = "nodejs";
+// envを使用するため動的に強制
+export const dynamic = "force-dynamic";
+export const runtime = "edge";
 
 export async function POST(request: Request): Promise<Response> {
   try {
@@ -14,28 +14,37 @@ export async function POST(request: Request): Promise<Response> {
       console.error(msg);
       throw new Error(msg);
     }
+    const apiUrl = "https://api-free.deepl.com/v2/translate";
 
-    const translator = new deepl.Translator(apiKey);
+    // URLSearchParams を使ってリクエストデータを作成
+    const data = new URLSearchParams((await request.json()).params);
 
-    const { text, source_lang, target_lang }: DeepLTranslateAPIRequest = (
-      await request.json()
-    ).params;
+    // fetch リクエストの送信
+    const fetchResponse = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `DeepL-Auth-Key ${apiKey}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: data.toString(),
+    });
 
-    const result = await translator.translateText(
-      text,
-      source_lang,
-      target_lang
-    );
+    if (!fetchResponse.ok) {
+      throw new Error("Failed to fetch translation");
+    }
 
-    return new Response(JSON.stringify(result.text), {
+    const json: DeepLTranslateAPIResponse = await fetchResponse.json();
+    const result = json.translations.map((translation) => translation.text).toString();
+
+    return new Response(result, {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Error during DeepL translation:", error);
+    // 動的サーバーエラーは再スローが必要
     if (isDynamicServerError(error)) {
       throw error;
     }
-    // エラーが動的サーバーエラーでない場合のデフォルトのレスポンスを追加
+    // 動的サーバーエラー以外のサーバー側エラー
     return new Response("Internal Server Error", { status: 500 });
   }
 }

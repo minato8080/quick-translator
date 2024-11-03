@@ -50,6 +50,17 @@ export type GoogleTranslateAPIRequest = {
 };
 
 /**
+ * Google Translate APIのレスポンス型
+ */
+export type DeepLTranslateAPIResponse = {
+  translations: {
+    detected_source_language: string;
+    text: string;
+    billed_characters: number;
+  }[];
+};
+
+/**
  * DeepL Translate APIのリクエスト型
  */
 export type DeepLTranslateAPIRequest = {

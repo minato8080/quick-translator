@@ -1,14 +1,13 @@
 import { isDynamicServerError } from "next/dist/client/components/hooks-server-context";
 
 export const dynamic = 'force-dynamic'; // static by default, unless reading the request
-export const runtime = "nodejs";
+export const runtime = "edge";
 
 export async function GET(request: Request): Promise<Response> {
   try {
     const apiUrl = process.env.GOOGLE_TRANSLATE_API;
     if (!apiUrl) {
       const msg = "Google Translate API URL is not defined.";
-      console.error(msg);
       throw new Error(msg);
     }
 
@@ -30,11 +29,11 @@ export async function GET(request: Request): Promise<Response> {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Error during DeepL translation:", error);
+    // 動的サーバーエラーは再スローが必要
     if (isDynamicServerError(error)) {
       throw error;
     }
-    // エラーが動的サーバーエラーでない場合のデフォルトのレスポンスを追加
+    // 動的サーバーエラー以外のサーバー側エラー
     return new Response("Internal Server Error", { status: 500 });
   }
 }
