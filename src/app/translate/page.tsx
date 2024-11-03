@@ -66,7 +66,7 @@ export default function Translate() {
         target: targetLang,
       };
       const response = await axios.get<GoogleTranslateAPIResponse>(
-        "/api/translate/google",
+        "/api/translate/google/",
         {
           params,
         }
@@ -102,7 +102,7 @@ export default function Translate() {
         source_lang: sourceLang,
         target_lang: targetLang !== "en" ? targetLang : "en-US",
       };
-      const response = await axios.post<string>("/api/translate/deepl", {
+      const response = await axios.post<string>("/api/translate/deepl/", {
         params,
       });
 

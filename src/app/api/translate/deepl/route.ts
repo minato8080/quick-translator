@@ -34,7 +34,9 @@ export async function POST(request: Request): Promise<Response> {
     }
 
     const json: DeepLTranslateAPIResponse = await fetchResponse.json();
-    const result = json.translations.map((translation) => translation.text).toString();
+    const result = json.translations
+      .map((translation) => translation.text)
+      .toString();
 
     return new Response(result, {
       headers: { "Content-Type": "application/json" },
@@ -45,6 +47,6 @@ export async function POST(request: Request): Promise<Response> {
       throw error;
     }
     // 動的サーバーエラー以外のサーバー側エラー
-    return new Response("Internal Server Error", { status: 500 });
+    return new Response(`Internal Server Error:${error}`, { status: 500 });
   }
 }
