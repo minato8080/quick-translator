@@ -1,6 +1,6 @@
 "use client";
 
-import type { SetStateAction} from "react";
+import type { SetStateAction } from "react";
 import { useEffect, useState } from "react";
 
 import { format } from "date-fns";
@@ -17,10 +17,6 @@ import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { languages } from "@/types/types";
-
-
-
-
 
 type IOType = "input" | "output";
 
@@ -155,20 +151,20 @@ const EditableText = ({
               prev ? { ...prev, [io]: e.target.value } : null
             )
           }
-          className="flex-grow p-2 text-md"
+          className="textarea field-sizing-content"
         />
       ) : (
-        <p
+        <textarea
           className={`${
             !isLearningMode
               ? "text-gray-800"
               : switchIO(learningMode, item, io) === "output" && !item.visible
               ? "text-transparent"
               : "text-gray-800"
-          } p-2`}
-        >
-          {item[io]}
-        </p>
+          } textarea field-sizing-content bg-white border-white`}
+          disabled={true}
+          value={item[isLearningMode ? io: switchIO(learningMode, item, io)]}
+        />
       )}
     </>
   );
@@ -373,7 +369,7 @@ const CardCore = ({
                 />
               </div>
               {/* 翻訳先テキストの表示または編集 */}
-              <div className="flex justify-between items-center mb-2">
+              <div className="flex justify-between items-center mb-1">
                 <EditableText
                   io={switchIO(learningMode, item, "output")}
                   item={item}
@@ -431,7 +427,7 @@ export const Flashcard = ({
       }, {} as Record<string, typeof flashcards>);
       setGroupedHistory(newGroupedHistory);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [flashcards]);
 
   return (

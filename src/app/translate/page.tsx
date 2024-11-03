@@ -19,7 +19,6 @@ import { Flashcard } from "@/components/Flashcard";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { TOAST_STYLE } from "@/global/style";
 import { useToast } from "@/hooks/use-toast";
 import { useAlertPopup } from "@/hooks/useAlertPopup";
@@ -296,7 +295,7 @@ export default function Translate() {
           </div>
           {/* 翻訳するテキストを入力するテキストエリア */}
           <textarea
-            className="w-full p-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none mb-2"
+            className="textarea w-full border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none mb-2"
             placeholder="Enter text to translate..."
             value={inputText}
             onChange={(e) => {
@@ -309,12 +308,14 @@ export default function Translate() {
           />
           <div className="relative">
             {/* 翻訳結果の表示 */}
-            <Label className="w-full p-2 rounded-md border border-gray-300 bg-gray-50 block mb-2 min-h-[64px] text-md">
-              {translatedText}
-            </Label>
+            <textarea
+              className="textarea w-full border-gray-300 bg-gray-60 text-gray-700"
+              disabled={true}
+              value={translatedText}
+            />
             {/* 翻訳中のローディングインジケーター */}
             {isTranslating && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-50 rounded-md">
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-50 rounded-md h-16">
                 <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
               </div>
             )}
