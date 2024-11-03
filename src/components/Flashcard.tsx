@@ -163,7 +163,7 @@ const EditableText = ({
               : "text-gray-800"
           } textarea field-sizing-content bg-white border-white`}
           disabled={true}
-          value={item[isLearningMode ? io: switchIO(learningMode, item, io)]}
+          value={item[isLearningMode ? io : switchIO(learningMode, item, io)]}
         />
       )}
     </>
