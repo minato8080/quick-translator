@@ -2,13 +2,12 @@ import { useState } from "react";
 
 import { format, parse } from "date-fns";
 
-import type { FlashcardType, ScreenMode} from "@/types/types";
+import type { FlashcardType, LanguagesKeys, ScreenMode } from "@/types/types";
 
 import { db } from "@/global/dexieDB";
 import { TOAST_STYLE } from "@/global/style";
 import { useToast } from "@/hooks/use-toast";
 import { FORMAT } from "@/types/types";
-
 
 /**
  * フラッシュカードの操作を管理するカスタムフック
@@ -20,6 +19,31 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
   >(null);
   const { toast } = useToast();
   const [flashcards, setFlashcards] = useState<Array<FlashcardType>>([]);
+
+  /**
+   * 翻訳履歴に追加する関数
+   */
+  const handleAddTranslation = (
+    inputText: string,
+    translatedText: string,
+    sourceLang: LanguagesKeys,
+    targetLang: LanguagesKeys
+  ) => {
+    handleCancelEdit();
+    setFlashcards((prev) => [
+      {
+        input: inputText,
+        output: translatedText,
+        sourceLang: sourceLang,
+        targetLang: targetLang,
+        saved: false,
+        editing: false,
+        visible: true,
+        timestamp: format(new Date(), FORMAT.TIMESTAMP),
+      },
+      ...prev,
+    ]);
+  };
 
   /**
    * 翻訳を保存する関数
@@ -260,6 +284,7 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
     setFlashcards,
     editingText,
     setEditingText,
+    handleAddTranslation,
     handleSaveAllTranslations,
     handleSaveTranslation,
     handleDeleteTranslation,

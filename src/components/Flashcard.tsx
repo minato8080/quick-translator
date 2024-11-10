@@ -2,6 +2,7 @@
 
 import type { SetStateAction } from "react";
 import { useEffect, useState } from "react";
+import React from "react";
 
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
@@ -394,76 +395,81 @@ const CardCore = ({
  * @param isLearningMode - 学習モードかどうか
  * @param learningMode - 学習モードのタイプ
  */
-export const Flashcard = ({
-  flashcardHandler,
-  isGroupedView,
-  isLearningMode = false,
-  learningMode,
-}: {
-  flashcardHandler: ReturnType<typeof useFlashcardHandler>;
-  isGroupedView: boolean;
-  isLearningMode?: boolean;
-  learningMode: LearningMode;
-}) => {
-  const { flashcards } = flashcardHandler;
-  const [groupedHistory, setGroupedHistory] = useState<
-    Record<string, FlashcardType[]>
-  >({});
+export const Flashcard = React.memo(
+  ({
+    flashcardHandler,
+    isGroupedView,
+    isLearningMode = false,
+    learningMode,
+  }: {
+    flashcardHandler: ReturnType<typeof useFlashcardHandler>;
+    isGroupedView: boolean;
+    isLearningMode?: boolean;
+    learningMode: LearningMode;
+  }) => {
+    const { flashcards } = flashcardHandler;
+    const [groupedHistory, setGroupedHistory] = useState<
+      Record<string, FlashcardType[]>
+    >({});
 
-  useEffect(() => {
-    if (isGroupedView) {
-      const newGroupedHistory = flashcards.reduce((acc, item) => {
-        const date = format(new Date(item.timestamp), "yyyy/MM/dd");
-        if (!acc[date]) {
-          acc[date] = [];
-        }
-        acc[date].push(item);
-        return acc;
-      }, {} as Record<string, typeof flashcards>);
-      setGroupedHistory(newGroupedHistory);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [flashcards]);
+    useEffect(() => {
+      if (isGroupedView) {
+        const newGroupedHistory = flashcards.reduce((acc, item) => {
+          const date = format(new Date(item.timestamp), "yyyy/MM/dd");
+          if (!acc[date]) {
+            acc[date] = [];
+          }
+          acc[date].push(item);
+          return acc;
+        }, {} as Record<string, typeof flashcards>);
+        setGroupedHistory(newGroupedHistory);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [flashcards]);
 
-  return (
-    <AnimatePresence>
-      {isGroupedView ? (
-        ((indexAdjuster = 0) =>
-          Object.entries(groupedHistory).map(([date, items]) => (
-            <motion.div
-              key={date}
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="flex items-center space-x-2 m-1">
-                <div className="h-px bg-gray-300 flex-grow" />
-                <h3 className="text-md font-semibold text-gray-500">{date}</h3>
-                <div className="h-px bg-gray-300 flex-grow" />
-              </div>
-              <CardCore
-                items={items}
-                flashcardHandler={flashcardHandler}
-                startIndex={(() => {
-                  const index = indexAdjuster;
-                  indexAdjuster += items.length;
-                  return index;
-                })()}
-                isLearningMode={isLearningMode}
-                learningMode={learningMode}
-              />
-            </motion.div>
-          )))()
-      ) : (
-        <CardCore
-          items={flashcards}
-          flashcardHandler={flashcardHandler}
-          isLearningMode={isLearningMode}
-          learningMode={learningMode}
-        />
-      )}
-    </AnimatePresence>
-  );
-};
+    return (
+      <AnimatePresence>
+        {isGroupedView ? (
+          ((indexAdjuster = 0) =>
+            Object.entries(groupedHistory).map(([date, items]) => (
+              <motion.div
+                key={date}
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="flex items-center space-x-2 m-1">
+                  <div className="h-px bg-gray-300 flex-grow" />
+                  <h3 className="text-md font-semibold text-gray-500">
+                    {date}
+                  </h3>
+                  <div className="h-px bg-gray-300 flex-grow" />
+                </div>
+                <CardCore
+                  items={items}
+                  flashcardHandler={flashcardHandler}
+                  startIndex={(() => {
+                    const index = indexAdjuster;
+                    indexAdjuster += items.length;
+                    return index;
+                  })()}
+                  isLearningMode={isLearningMode}
+                  learningMode={learningMode}
+                />
+              </motion.div>
+            )))()
+        ) : (
+          <CardCore
+            items={flashcards}
+            flashcardHandler={flashcardHandler}
+            isLearningMode={isLearningMode}
+            learningMode={learningMode}
+          />
+        )}
+      </AnimatePresence>
+    );
+  }
+);
+Flashcard.displayName = "Flashcard";
 
 export default Flashcard;

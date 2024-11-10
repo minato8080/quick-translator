@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import React from "react";
 
 import axios from "axios";
-import { format } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRightLeft, Loader2 } from "lucide-react";
 
@@ -23,13 +23,13 @@ import { TOAST_STYLE } from "@/global/style";
 import { useToast } from "@/hooks/use-toast";
 import { useAlertPopup } from "@/hooks/useAlertPopup";
 import { useFlashcardHandler } from "@/hooks/useFlashcardHandler";
-import { languages, FORMAT } from "@/types/types";
+import { languages } from "@/types/types";
 
-/**
- * 翻訳コンポーネント
- * @returns 翻訳機能を提供するReactコンポーネント
- */
-export default function Translate() {
+const InputArea = React.memo(({
+  flashcardHandler,
+}: {
+  flashcardHandler: ReturnType<typeof useFlashcardHandler>;
+}) => {
   const [inputText, setInputText] = useState("");
   const [translatedText, setTranslatedText] = useState("");
   const [sourceLang, setSourceLang] = useState<LanguagesKeys>("en");
@@ -38,15 +38,12 @@ export default function Translate() {
   const [rotate, setRotate] = useState(0);
   const { toast } = useToast();
   const { showAlert } = useAlertPopup();
-
-  const flashcardHandler = useFlashcardHandler("translate");
   const {
     flashcards,
-    setFlashcards,
+    handleAddTranslation,
     handleSaveAllTranslations,
     handleCancelEdit,
   } = flashcardHandler;
-
   /**
    * 翻訳関数
    * @param text 翻訳するテキスト
@@ -203,19 +200,7 @@ export default function Translate() {
   const handleAddToHistory = () => {
     if (inputText && translatedText && !isTranslating) {
       handleCancelEdit();
-      setFlashcards((prev) => [
-        {
-          input: inputText,
-          output: translatedText,
-          sourceLang: sourceLang,
-          targetLang: targetLang,
-          saved: false,
-          editing: false,
-          visible: true,
-          timestamp: format(new Date(), FORMAT.TIMESTAMP),
-        },
-        ...prev,
-      ]);
+      handleAddTranslation(inputText, translatedText, sourceLang, targetLang);
       setInputText("");
       setTranslatedText("");
     }
@@ -231,6 +216,136 @@ export default function Translate() {
       handleAddToHistory();
     }
   };
+
+  return (
+    <Card className="fixed bottom-0 w-full max-w-3xl">
+      <CardContent className="p-4">
+        <div className="flex justify-between items-center mb-2">
+          {/* 翻訳元の言語表示 */}
+          <AnimatePresence mode="wait">
+            <motion.span
+              key={sourceLang}
+              className="font-medium text-gray-700 min-w-[80px] text-center"
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -10, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {languages[sourceLang]}
+            </motion.span>
+          </AnimatePresence>
+          {/* 言語の入れ替えボタン */}
+          <motion.div animate={{ rotate }} transition={{ duration: 0.3 }}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="hover:bg-gray-600"
+              onClick={handleSwapLanguages}
+            >
+              <ArrowRightLeft className="h-4 w-4" />
+              <span className="sr-only">Swap languages</span>
+            </Button>
+          </motion.div>
+          {/* 翻訳先の言語表示 */}
+          <AnimatePresence mode="wait">
+            <motion.span
+              key={targetLang}
+              className="font-medium text-gray-700 min-w-[80px] text-center"
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -10, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {languages[targetLang]}
+            </motion.span>
+          </AnimatePresence>
+        </div>
+        {/* 翻訳するテキストを入力するテキストエリア */}
+        <textarea
+          className="textarea w-full border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none mb-2"
+          placeholder="Enter text to translate..."
+          value={inputText}
+          onChange={(e) => {
+            setIsTranslating(true);
+            setInputText(e.target.value);
+          }}
+          onKeyDown={handleKeyDown}
+          rows={2}
+          aria-label="Input text for translation"
+        />
+        <div className="relative">
+          {/* 翻訳結果の表示 */}
+          <textarea
+            className="textarea w-full border-gray-300 bg-gray-60 text-gray-700"
+            disabled={true}
+            value={translatedText}
+          />
+          {/* 翻訳中のローディングインジケーター */}
+          {isTranslating && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-50 rounded-md h-16">
+              <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+            </div>
+          )}
+        </div>
+        <div className="flex justify-end mt-2 space-x-4">
+          {/* 高精度の翻訳を行うボタン */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="hover:bg-gray-600 text-[14px] w-20"
+            onClick={handlePreciseTranslation}
+            disabled={inputText === "" || isTranslating}
+          >
+            Rethink
+          </Button>
+          {/* 全ての翻訳を保存するボタン */}
+          <ConfirmDialog title="Save all results to vocabulary?" ok="Save">
+            <Button
+              variant="outline"
+              size="sm"
+              className="hover:bg-gray-600 text-[14px] w-20"
+                disabled={
+                  flashcards.length === 0 ||
+                  flashcards.every((elem) => elem.saved)
+                }
+              onClick={handleSaveAllTranslations}
+            >
+              Save All
+            </Button>
+          </ConfirmDialog>
+          {/* クリアボタン */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="hover:bg-gray-600 text-[14px] w-20"
+            onClick={handleClear}
+            disabled={inputText === "" && translatedText === ""}
+          >
+            Clear
+          </Button>
+          {/* 翻訳履歴に追加するボタン */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="hover:bg-gray-600 text-[14px] w-20"
+            onClick={handleAddToHistory}
+            disabled={inputText === ""}
+          >
+            Submit
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+});
+InputArea.displayName = "InputArea";
+
+/**
+ * 翻訳コンポーネント
+ * @returns 翻訳機能を提供するReactコンポーネント
+ */
+export default function Translate() {
+  const flashcardHandler = useFlashcardHandler("translate");
 
   return (
     <div className="min-h-screen bg-blue-50 flex flex-col items-center">
@@ -251,124 +366,7 @@ export default function Translate() {
         </div>
       </div>
       {/* 入力部分 */}
-      <Card className="fixed bottom-0 w-full max-w-3xl">
-        <CardContent className="p-4">
-          <div className="flex justify-between items-center mb-2">
-            {/* 翻訳元の言語表示 */}
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={sourceLang}
-                className="font-medium text-gray-700 min-w-[80px] text-center"
-                initial={{ y: 10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -10, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                {languages[sourceLang]}
-              </motion.span>
-            </AnimatePresence>
-            {/* 言語の入れ替えボタン */}
-            <motion.div animate={{ rotate }} transition={{ duration: 0.3 }}>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="hover:bg-gray-600"
-                onClick={handleSwapLanguages}
-              >
-                <ArrowRightLeft className="h-4 w-4" />
-                <span className="sr-only">Swap languages</span>
-              </Button>
-            </motion.div>
-            {/* 翻訳先の言語表示 */}
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={targetLang}
-                className="font-medium text-gray-700 min-w-[80px] text-center"
-                initial={{ y: 10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -10, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                {languages[targetLang]}
-              </motion.span>
-            </AnimatePresence>
-          </div>
-          {/* 翻訳するテキストを入力するテキストエリア */}
-          <textarea
-            className="textarea w-full border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none mb-2"
-            placeholder="Enter text to translate..."
-            value={inputText}
-            onChange={(e) => {
-              setIsTranslating(true);
-              setInputText(e.target.value);
-            }}
-            onKeyDown={handleKeyDown}
-            rows={2}
-            aria-label="Input text for translation"
-          />
-          <div className="relative">
-            {/* 翻訳結果の表示 */}
-            <textarea
-              className="textarea w-full border-gray-300 bg-gray-60 text-gray-700"
-              disabled={true}
-              value={translatedText}
-            />
-            {/* 翻訳中のローディングインジケーター */}
-            {isTranslating && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-50 rounded-md h-16">
-                <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-              </div>
-            )}
-          </div>
-          <div className="flex justify-end mt-2 space-x-4">
-            {/* 高精度の翻訳を行うボタン */}
-            <Button
-              variant="outline"
-              size="sm"
-              className="hover:bg-gray-600 text-[14px] w-20"
-              onClick={handlePreciseTranslation}
-              disabled={inputText === "" || isTranslating}
-            >
-              Rethink
-            </Button>
-            {/* 全ての翻訳を保存するボタン */}
-            <ConfirmDialog title="Save all results to vocabulary?" ok="Save">
-              <Button
-                variant="outline"
-                size="sm"
-                className="hover:bg-gray-600 text-[14px] w-20"
-                disabled={
-                  flashcards.length === 0 ||
-                  flashcards.every((elem) => elem.saved)
-                }
-                onClick={handleSaveAllTranslations}
-              >
-                Save All
-              </Button>
-            </ConfirmDialog>
-            {/* クリアボタン */}
-            <Button
-              variant="outline"
-              size="sm"
-              className="hover:bg-gray-600 text-[14px] w-20"
-              onClick={handleClear}
-              disabled={inputText === "" && translatedText === ""}
-            >
-              Clear
-            </Button>
-            {/* 翻訳履歴に追加するボタン */}
-            <Button
-              variant="outline"
-              size="sm"
-              className="hover:bg-gray-600 text-[14px] w-20"
-              onClick={handleAddToHistory}
-              disabled={inputText === ""}
-            >
-              Submit
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <InputArea flashcardHandler={flashcardHandler} />
     </div>
   );
 }

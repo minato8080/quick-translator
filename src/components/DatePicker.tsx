@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import React from "react";
 
 import { getDaysInMonth } from "date-fns";
 import { parse, format } from "date-fns";
@@ -262,7 +263,7 @@ export function DatePicker({
   );
 }
 
-export const DateSearchBox = ({
+export const DateSearchBox = React.memo(({
   setConditionDate,
 }: {
   setConditionDate: React.Dispatch<React.SetStateAction<string>>;
@@ -301,4 +302,6 @@ export const DateSearchBox = ({
       </Button>
     </div>
   );
-};
+});
+
+DateSearchBox.displayName = "DateSearchBox";

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import React from "react";
 
 import { motion, useAnimation } from "framer-motion";
 import { ArrowRightLeft, Menu, Book } from "lucide-react";
@@ -88,7 +89,7 @@ const TranslateAnimation = ({
  * @param japanese - 日本語のタイトル
  * @returns ヘッダーUIをレンダリングするReactコンポーネント
  */
-export const Header = ({
+export const Header = React.memo(({
   english,
   japanese,
 }: {
@@ -156,4 +157,6 @@ export const Header = ({
       </div>
     </div>
   );
-};
+});
+
+Header.displayName = "Header";
