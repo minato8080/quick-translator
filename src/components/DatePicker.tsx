@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 
 import { getDaysInMonth } from "date-fns";
 import { parse, format } from "date-fns";
+import { useLiveQuery } from "dexie-react-hooks";
+import { Search } from "lucide-react";
 
-import type { Calendar } from "@/global/dexieDB";
+import { Button } from "./ui/button";
 
 import {
   Select,
@@ -14,8 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { db, type Calendar } from "@/global/dexieDB";
 import { cn } from "@/lib/utils";
-
 
 type DatePart = "year" | "month" | "day";
 
@@ -106,7 +108,7 @@ export function DatePicker({
       conditionDate = conditionDate.split("-").slice(0, -1).join("-");
 
     setDate(conditionDate);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [year, month, day, disabledMonth, disabledDay]);
 
   /**
@@ -259,3 +261,44 @@ export function DatePicker({
     </div>
   );
 }
+
+export const DateSearchBox = ({
+  setConditionDate,
+}: {
+  setConditionDate: React.Dispatch<React.SetStateAction<string>>;
+}) => {
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toLocaleDateString()
+  );
+  const calendar = useLiveQuery(async () => {
+    const result = await db.calendar?.toArray();
+
+    if (result.length > 0) {
+      const latestDate = result
+        .map((entry) => entry.date)
+        .sort()
+        .reverse()[0];
+      setConditionDate(latestDate.slice(0, 7));
+      setSelectedDate(latestDate);
+    }
+
+    return result;
+  });
+  return (
+    <div className="flex mb-2">
+      {/* 日付選択コンポーネント */}
+      <DatePicker setDate={setSelectedDate} calendar={calendar} />
+      {/* 検索ボタン */}
+      <Button
+        variant="outline"
+        size="icon"
+        className="hover:bg-gray-400 ml-2"
+        onClick={() => {
+          setConditionDate(selectedDate);
+        }}
+      >
+        <Search className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+};

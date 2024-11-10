@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { format } from "date-fns";
 import { useLiveQuery } from "dexie-react-hooks";
-import { Book, Edit, Eye, EyeOff, Search, SquareX } from "lucide-react";
+import { Book, Edit, Eye, EyeOff, SquareX } from "lucide-react";
 
 import type { LearningMode } from "@/types/types";
 
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { DatePicker } from "@/components/DatePicker";
+import { DateSearchBox } from "@/components/DatePicker";
 import { Flashcard } from "@/components/Flashcard";
 import { Header } from "@/components/Header";
 import { TriStateToggle } from "@/components/TriStateToggle";
@@ -29,48 +29,31 @@ export default function Vocabulary() {
   const [isLearningMode, setIsLearningMode] = useState(true);
   const [isTextAreaVisible, setIsTextAreaVisible] = useState(true);
   const [learningMode, setLearningMode] = useState<LearningMode>("origin");
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toLocaleDateString()
-  );
   const [conditionDate, setConditionDate] = useState(
     format(new Date(), FORMAT.DATE)
   );
   const { setFlashcards, handleCancelEdit, handleDeleteAllTranslations } =
     flashcardHandler;
-  const vocabulary = useLiveQuery(async () => {
-    return await db.vocabulary
+
+  useLiveQuery(async () => {
+    const result = await db.vocabulary
       ?.where("timestamp")
       .startsWith(conditionDate)
       .sortBy("timestamp")
       .then((res) => res.reverse());
-  }, [conditionDate]);
-  const calendar = useLiveQuery(async () => {
-    return await db.calendar?.toArray();
-  });
-  useEffect(() => {
-    if (calendar && calendar.length > 0) {
-      const latestDate = calendar
-        .map((entry) => entry.date)
-        .sort()
-        .reverse()[0];
-      setConditionDate(latestDate.slice(0, 7));
-      setSelectedDate(latestDate);
-    }
-  }, [calendar]);
 
-  useEffect(() => {
     setFlashcards(
-      vocabulary
-        ? vocabulary.map((item) => ({
-            ...item,
-            saved: true,
-            editing: false,
-            visible: true,
-          }))
-        : []
+      result.map((item) => ({
+        ...item,
+        saved: true,
+        editing: false,
+        visible: true,
+      }))
     );
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vocabulary]);
+
+    return result;
+  }, [conditionDate]);
+
 
   return (
     <div className="min-h-screen bg-blue-50 flex flex-col items-center">
@@ -81,21 +64,7 @@ export default function Vocabulary() {
         {/* メインコンテンツ部分 */}
         <div>
           <div className="flex flex-wrap justify-between items-center m-1">
-            <div className="flex mb-2">
-              {/* 日付選択コンポーネント */}
-              <DatePicker setDate={setSelectedDate} calendar={calendar} />
-              {/* 検索ボタン */}
-              <Button
-                variant="outline"
-                size="icon"
-                className="hover:bg-gray-400 ml-2"
-                onClick={() => {
-                  setConditionDate(selectedDate);
-                }}
-              >
-                <Search className="h-4 w-4" />
-              </Button>
-            </div>
+            <DateSearchBox setConditionDate={setConditionDate}/>
             <div className="flex ml-auto mb-2">
               {/* 翻訳の削除ボタン */}
               {!isLearningMode ? (

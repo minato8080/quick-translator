@@ -21,40 +21,36 @@ import { languages } from "@/types/types";
 type IOType = "input" | "output";
 
 /**
+ * テキストを音声合成で再生する
+ * @param text - 再生するテキスト
+ * @param lang - 言語コード
+ */
+const handleTextToSpeech = (
+  text: string,
+  lang: string,
+  setIsSpeaking: React.Dispatch<SetStateAction<boolean>>
+) => {
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = lang === "ja" ? "ja-JP" : "en-US";
+  window.speechSynthesis.speak(utterance);
+  setIsSpeaking(true);
+  utterance.onend = () => setIsSpeaking(false);
+};
+
+/**
  * スピーカーボタンコンポーネント
  * @param io - 入力または出力のタイプ
  * @param item - フラッシュカードのアイテム
  * @param lang - 言語コード
  */
-const SpeakerButton = ({
-  io,
-  item,
-  lang,
-}: {
-  io: IOType;
-  item: FlashcardType;
-  lang: string;
-}) => {
+const SpeakerButton = ({ text, lang }: { text: string; lang: string }) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
-
-  /**
-   * テキストを音声合成で再生する
-   * @param text - 再生するテキスト
-   * @param lang - 言語コード
-   */
-  const handleTextToSpeech = (text: string, lang: string) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang === "ja" ? "ja-JP" : "en-US";
-    window.speechSynthesis.speak(utterance);
-    setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-  };
 
   return (
     <Button
       variant="ghost"
       size="sm"
-      onClick={() => handleTextToSpeech(item[io], lang)}
+      onClick={() => handleTextToSpeech(text, lang, setIsSpeaking)}
     >
       <Volume2 className={`h-4 w-4 text-blue-${isSpeaking ? 600 : 400}`} />
       <span className="sr-only">Listen to source text</span>
@@ -191,8 +187,9 @@ const CardCore = ({
   isLearningMode: boolean;
   learningMode: LearningMode;
 }) => {
-  const { editingText, setEditingText } = flashcardHandler;
   const {
+    editingText,
+    setEditingText,
     setFlashcards,
     handleSaveTranslation,
     handleDeleteTranslation,
@@ -363,8 +360,7 @@ const CardCore = ({
                   learningMode={learningMode}
                 />
                 <SpeakerButton
-                  io={switchIO(learningMode, item, "input")}
-                  item={item}
+                  text={item[switchIO(learningMode, item, "input")]}
                   lang={switchSpeaker(learningMode, item, "input")}
                 />
               </div>
@@ -379,8 +375,7 @@ const CardCore = ({
                   learningMode={learningMode}
                 />
                 <SpeakerButton
-                  io={switchIO(learningMode, item, "output")}
-                  item={item}
+                  text={item[switchIO(learningMode, item, "output")]}
                   lang={switchSpeaker(learningMode, item, "output")}
                 />
               </div>
@@ -412,7 +407,7 @@ export const Flashcard = ({
 }) => {
   const { flashcards } = flashcardHandler;
   const [groupedHistory, setGroupedHistory] = useState<
-    Record<string, typeof flashcards>
+    Record<string, FlashcardType[]>
   >({});
 
   useEffect(() => {
@@ -470,3 +465,5 @@ export const Flashcard = ({
     </AnimatePresence>
   );
 };
+
+export default Flashcard;

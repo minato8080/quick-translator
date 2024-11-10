@@ -253,7 +253,7 @@ export default function Translate() {
       {/* 入力部分 */}
       <Card className="fixed bottom-0 w-full max-w-3xl">
         <CardContent className="p-4">
-          <div className="flex items-center justify-between items-center mb-2">
+          <div className="flex justify-between items-center mb-2">
             {/* 翻訳元の言語表示 */}
             <AnimatePresence mode="wait">
               <motion.span
