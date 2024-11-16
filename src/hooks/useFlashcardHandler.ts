@@ -4,7 +4,7 @@ import { format, parse } from "date-fns";
 import { useDispatch, useSelector } from "react-redux";
 
 import type { AppDispatch, RootState } from "@/global/store";
-import type { FlashcardType, LanguagesKeys, ScreenMode } from "@/types/types";
+import type { FlashcardType, LanguagesKeys } from "@/types/types";
 
 import { db } from "@/global/dexieDB";
 import {
@@ -27,9 +27,9 @@ export type FlashcardAPI = {
  * フラッシュカードの操作を管理するカスタムフック
  * @returns フラッシュカードの状態と操作関数を含むオブジェクト
  */
-export const useFlashcardHandler = (screenMode: ScreenMode) => {
+export const useFlashcardHandler = () => {
   const { toast } = useToast();
-  const { flashcard } = useSelector<
+  const { flashcard, screenMode } = useSelector<
     RootState,
     RootState[typeof FLASHCARD_SLICE_NAME]
   >((state) => state.flashcard);

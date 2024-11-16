@@ -2,10 +2,10 @@
 
 import { Provider } from "react-redux";
 
+import { FlashcardProvider } from "@/components/FlashcardHandler";
 import { Toaster } from "@/components/ui/toaster";
 import store from "@/global/store";
 import { AlertProvider } from "@/provider/AlertProvider";
-
 
 export default function Providers({
   children,
@@ -14,7 +14,9 @@ export default function Providers({
 }>) {
   return (
     <AlertProvider>
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}>
+        <FlashcardProvider>{children}</FlashcardProvider>
+      </Provider>
       <Toaster />
     </AlertProvider>
   );

@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import type { FLASHCARD_SLICE_NAME } from "@/global/flashcardSlice";
 import type { AppDispatch, RootState } from "@/global/store";
+import type { TRANSLATE_SLICE_NAME } from "@/global/translateSlice";
 import type {
   DeepLTranslateAPIRequest,
   GoogleTranslateAPIRequest,
@@ -19,26 +20,28 @@ import type {
 
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Flashcard } from "@/components/Flashcard";
+import { useFlashcardContextHandler } from "@/components/FlashcardHandler";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { changeScreenMode } from "@/global/flashcardSlice";
 import { TOAST_STYLE } from "@/global/style";
+import {
+  changeInput,
+  changeLoading,
+  changeOutput,
+  swapLanguages,
+} from "@/global/translateSlice";
 import { useToast } from "@/hooks/use-toast";
 import { useAlertPopup } from "@/hooks/useAlertPopup";
-import { useFlashcardHandler } from "@/hooks/useFlashcardHandler";
 import { languages } from "@/types/types";
 
-const SaveAllButton = ({
-  flashcardHandler,
-}: {
-  flashcardHandler: ReturnType<typeof useFlashcardHandler>;
-}) => {
+const SaveAllButton = () => {
   const { flashcard, saveInfo } = useSelector<
     RootState,
     RootState[typeof FLASHCARD_SLICE_NAME]
   >((state) => state.flashcard);
-  const { handleSaveAllTranslations } = flashcardHandler;
+  const { handleSaveAllTranslations } = useFlashcardContextHandler();
   return (
     <ConfirmDialog title="Save all results to vocabulary?" ok="Save">
       <Button
@@ -53,24 +56,20 @@ const SaveAllButton = ({
     </ConfirmDialog>
   );
 };
-const InputArea = ({
-  flashcardHandler,
+
+const InputTextarea = ({
+  handleAddToHistory,
 }: {
-  flashcardHandler: ReturnType<typeof useFlashcardHandler>;
+  handleAddToHistory: () => void;
 }) => {
-  const [inputText, setInputText] = useState("");
-  const [translatedText, setTranslatedText] = useState("");
-  const [sourceLang, setSourceLang] = useState<LanguagesKeys>("en");
-  const [targetLang, setTargetLang] = useState<LanguagesKeys>("ja");
-  const [isTranslating, setIsTranslating] = useState(false);
-  const [rotate, setRotate] = useState(0);
+  const { input, output, loading, sourceLang, targetLang } = useSelector<
+    RootState,
+    RootState[typeof TRANSLATE_SLICE_NAME]
+  >((state) => state.translate);
+  const dispatch = useDispatch<AppDispatch>();
   const { toast } = useToast();
   const { showAlert } = useAlertPopup();
-  const { handleAddTranslation } = flashcardHandler;
-  const dispatch = useDispatch<AppDispatch>();
-  useEffect(() => {
-    dispatch(changeScreenMode("translate"));
-  }, [dispatch]);
+
   /**
    * 翻訳関数
    * @param text 翻訳するテキスト
@@ -109,6 +108,98 @@ const InputArea = ({
   };
 
   /**
+   * 翻訳を実行する関数
+   */
+  const handleTranslation = useCallback(async () => {
+    if (input) {
+      try {
+        const result = await translateWithGoogle(input, sourceLang, targetLang);
+        dispatch(changeOutput(result));
+      } catch {
+        toast({
+          title: "Translation Error",
+          description:
+            "An error occurred during translation. Please try again.",
+          variant: "destructive",
+          style: TOAST_STYLE,
+        });
+      } finally {
+        dispatch(changeLoading(false));
+      }
+    } else {
+      dispatch(changeOutput(""));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input, sourceLang, targetLang]);
+
+  /**
+   * 入力テキストが変更されたときに翻訳をトリガーする
+   */
+  useEffect(() => {
+    const translateTimeout = setTimeout(() => {
+      handleTranslation();
+    }, 300);
+
+    return () => clearTimeout(translateTimeout);
+  }, [handleTranslation]);
+
+  /**
+   * Enterキーが押されたときに履歴に追加する関数
+   * @param e キーボードイベント
+   */
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleAddToHistory();
+    }
+  };
+  return (
+    <>
+      <textarea
+        className="textarea w-full border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none mb-2"
+        placeholder="Enter text to translate..."
+        value={input}
+        onChange={(e) => {
+          dispatch(changeLoading(true));
+          dispatch(changeInput(e.target.value));
+        }}
+        onKeyDown={handleKeyDown}
+        rows={2}
+        aria-label="Input text for translation"
+      />
+      <div className="relative">
+        {/* 翻訳結果の表示 */}
+        <textarea
+          className="textarea w-full border-gray-300 bg-gray-60 text-gray-700"
+          disabled={true}
+          value={output}
+        />
+        {/* 翻訳中のローディングインジケーター */}
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-50 rounded-md h-16">
+            <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+          </div>
+        )}
+      </div>
+    </>
+  );
+};
+
+const InputArea = () => {
+  const { input, output, loading, sourceLang, targetLang } = useSelector<
+    RootState,
+    RootState[typeof TRANSLATE_SLICE_NAME]
+  >((state) => state.translate);
+  const dispatch = useDispatch<AppDispatch>();
+  const [rotate, setRotate] = useState(0);
+  const { toast } = useToast();
+  const { showAlert } = useAlertPopup();
+  const { handleAddTranslation } = useFlashcardContextHandler();
+  useEffect(() => {
+    dispatch(changeScreenMode("translate"));
+  }, [dispatch]);
+
+  /**
    * 高精度の翻訳関数
    * @param text 翻訳するテキスト
    * @param sourceLang ソース言語
@@ -139,57 +230,13 @@ const InputArea = ({
   };
 
   /**
-   * 翻訳を実行する関数
-   */
-  const handleTranslation = useCallback(async () => {
-    if (inputText) {
-      try {
-        const result = await translateWithGoogle(
-          inputText,
-          sourceLang,
-          targetLang
-        );
-        setTranslatedText(result);
-      } catch {
-        toast({
-          title: "Translation Error",
-          description:
-            "An error occurred during translation. Please try again.",
-          variant: "destructive",
-          style: TOAST_STYLE,
-        });
-      } finally {
-        setIsTranslating(false);
-      }
-    } else {
-      setTranslatedText("");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputText, sourceLang, targetLang]);
-
-  /**
-   * 入力テキストが変更されたときに翻訳をトリガーする
-   */
-  useEffect(() => {
-    const translateTimeout = setTimeout(() => {
-      handleTranslation();
-    }, 300);
-
-    return () => clearTimeout(translateTimeout);
-  }, [handleTranslation]);
-
-  /**
    * 高精度の翻訳を実行する関数
    */
   const handlePreciseTranslation = async () => {
-    setIsTranslating(true);
+    dispatch(changeLoading(true));
     try {
-      const result = await translateWithDeepL(
-        inputText,
-        sourceLang,
-        targetLang
-      );
-      setTranslatedText(result);
+      const result = await translateWithDeepL(input, sourceLang, targetLang);
+      dispatch(changeOutput(result));
     } catch {
       toast({
         title: "Translation Error",
@@ -198,7 +245,7 @@ const InputArea = ({
         style: TOAST_STYLE,
       });
     } finally {
-      setIsTranslating(false);
+      dispatch(changeLoading(false));
     }
   };
 
@@ -206,18 +253,15 @@ const InputArea = ({
    * 入力テキスト、翻訳結果をクリアする関数
    */
   const handleClear = () => {
-    setInputText("");
-    setTranslatedText("");
+    dispatch(changeInput(""));
+    dispatch(changeOutput(""));
   };
 
   /**
    * ソース言語とターゲット言語を入れ替える関数
    */
   const handleSwapLanguages = () => {
-    setSourceLang(targetLang);
-    setTargetLang(sourceLang);
-    setInputText(translatedText);
-    setTranslatedText("");
+    dispatch(swapLanguages());
     setRotate((prev) => prev + 180);
   };
 
@@ -225,21 +269,10 @@ const InputArea = ({
    * 翻訳履歴に追加する関数
    */
   const handleAddToHistory = () => {
-    if (inputText && translatedText && !isTranslating) {
-      handleAddTranslation(inputText, translatedText, sourceLang, targetLang);
-      setInputText("");
-      setTranslatedText("");
-    }
-  };
-
-  /**
-   * Enterキーが押されたときに履歴に追加する関数
-   * @param e キーボードイベント
-   */
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleAddToHistory();
+    if (input && output && !loading) {
+      handleAddTranslation(input, output, sourceLang, targetLang);
+      dispatch(changeInput(""));
+      dispatch(changeOutput(""));
     }
   };
 
@@ -287,32 +320,7 @@ const InputArea = ({
           </AnimatePresence>
         </div>
         {/* 翻訳するテキストを入力するテキストエリア */}
-        <textarea
-          className="textarea w-full border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none mb-2"
-          placeholder="Enter text to translate..."
-          value={inputText}
-          onChange={(e) => {
-            setIsTranslating(true);
-            setInputText(e.target.value);
-          }}
-          onKeyDown={handleKeyDown}
-          rows={2}
-          aria-label="Input text for translation"
-        />
-        <div className="relative">
-          {/* 翻訳結果の表示 */}
-          <textarea
-            className="textarea w-full border-gray-300 bg-gray-60 text-gray-700"
-            disabled={true}
-            value={translatedText}
-          />
-          {/* 翻訳中のローディングインジケーター */}
-          {isTranslating && (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-50 rounded-md h-16">
-              <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-            </div>
-          )}
-        </div>
+        <InputTextarea handleAddToHistory={handleAddToHistory} />
         <div className="flex justify-end mt-2 space-x-4">
           {/* 高精度の翻訳を行うボタン */}
           <Button
@@ -320,19 +328,19 @@ const InputArea = ({
             size="sm"
             className="hover:bg-gray-600 text-[14px] w-20"
             onClick={handlePreciseTranslation}
-            disabled={inputText === "" || isTranslating}
+            disabled={input === "" || loading}
           >
             Rethink
           </Button>
           {/* 全ての翻訳を保存するボタン */}
-          <SaveAllButton flashcardHandler={flashcardHandler} />
+          <SaveAllButton />
           {/* クリアボタン */}
           <Button
             variant="outline"
             size="sm"
             className="hover:bg-gray-600 text-[14px] w-20"
             onClick={handleClear}
-            disabled={inputText === "" && translatedText === ""}
+            disabled={input === "" && output === ""}
           >
             Clear
           </Button>
@@ -342,7 +350,7 @@ const InputArea = ({
             size="sm"
             className="hover:bg-gray-600 text-[14px] w-20"
             onClick={handleAddToHistory}
-            disabled={inputText === ""}
+            disabled={input === ""}
           >
             Submit
           </Button>
@@ -357,8 +365,6 @@ const InputArea = ({
  * @returns 翻訳機能を提供するReactコンポーネント
  */
 export default function Translate() {
-  const flashcardHandler = useFlashcardHandler("translate");
-
   return (
     <div className="min-h-screen bg-blue-50 flex flex-col items-center">
       {/* メインのカードコンテナ */}
@@ -370,14 +376,11 @@ export default function Translate() {
           style={{ height: "calc(100vh - 257px - 56px)" }}
         >
           {/* 翻訳履歴の表示 */}
-          <Flashcard
-            flashcardHandler={flashcardHandler}
-            isGroupedView={false}
-          />
+          <Flashcard isGroupedView={false} />
         </div>
       </div>
       {/* 入力部分 */}
-      <InputArea flashcardHandler={flashcardHandler} />
+      <InputArea />
     </div>
   );
 }

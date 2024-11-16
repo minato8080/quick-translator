@@ -10,12 +10,12 @@ import { X, RotateCcw, Save, Edit, Check, Eye, EyeOff } from "lucide-react";
 import { Volume2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 
+import { useFlashcardContextHandler } from "./FlashcardHandler";
 import { Switch } from "./ui/switch";
 
 import type { AppDispatch, RootState } from "@/global/store";
 import type {
   FlashcardAPI,
-  useFlashcardHandler,
 } from "@/hooks/useFlashcardHandler";
 import type { FlashcardType, LearningMode } from "@/types/types";
 
@@ -194,15 +194,7 @@ const EditableText = ({
  * @param isLearningMode - 学習モードかどうか
  * @param learningMode - 学習モードのタイプ
  */
-const CardLeef = ({
-  flashcardHandler,
-  item,
-  index,
-}: {
-  flashcardHandler: ReturnType<typeof useFlashcardHandler>;
-  item: FlashcardType;
-  index: number;
-}) => {
+const CardLeef = ({ item, index }: { item: FlashcardType; index: number }) => {
   const {
     learningMode,
     isLearningMode,
@@ -218,7 +210,7 @@ const CardLeef = ({
   const [isSaved, setIsSaved] = useState(screenMode === "vocabulary");
   const [isEditing, setIsEditing] = useState(false);
   const { flashcardAPI, handleSaveTranslation, handleDeleteTranslation } =
-    flashcardHandler;
+    useFlashcardContextHandler();
   useEffect(() => setIsVisible(isVisibleParent), [isVisibleParent]);
   useEffect(() => {
     if (isLearningMode) setIsEditing(false);
@@ -429,11 +421,9 @@ const CardLeef = ({
  * @param learningMode - 学習モードのタイプ
  */
 const CardCore = ({
-  flashcardHandler,
   items,
   startIndex = 0,
 }: {
-  flashcardHandler: ReturnType<typeof useFlashcardHandler>;
   items: FlashcardType[];
   startIndex?: number;
 }) => {
@@ -443,7 +433,6 @@ const CardCore = ({
         <CardLeef
           key={item.timestamp}
           index={startIndex + divisionIndex}
-          flashcardHandler={flashcardHandler}
           item={item}
         />
       ))}
@@ -459,13 +448,7 @@ const CardCore = ({
  * @param learningMode - 学習モードのタイプ
  */
 export const Flashcard = React.memo(
-  ({
-    flashcardHandler,
-    isGroupedView,
-  }: {
-    flashcardHandler: ReturnType<typeof useFlashcardHandler>;
-    isGroupedView: boolean;
-  }) => {
+  ({ isGroupedView }: { isGroupedView: boolean }) => {
     const { flashcard } = useSelector<
       RootState,
       RootState[typeof FLASHCARD_SLICE_NAME]
@@ -509,7 +492,6 @@ export const Flashcard = React.memo(
                 </div>
                 <CardCore
                   items={items}
-                  flashcardHandler={flashcardHandler}
                   startIndex={(() => {
                     const index = indexAdjuster;
                     indexAdjuster += items.length;
@@ -519,7 +501,7 @@ export const Flashcard = React.memo(
               </motion.div>
             )))()
         ) : (
-          <CardCore items={flashcard} flashcardHandler={flashcardHandler} />
+          <CardCore items={flashcard} />
           // <CardCore items={flashcard} />
         )}
       </AnimatePresence>

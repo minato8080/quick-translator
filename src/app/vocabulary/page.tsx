@@ -12,6 +12,7 @@ import type { AppDispatch, RootState } from "@/global/store";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { DateSearchBox } from "@/components/DatePicker";
 import { Flashcard } from "@/components/Flashcard";
+import { useFlashcardContextHandler } from "@/components/FlashcardHandler";
 import { Header } from "@/components/Header";
 import { TriStateToggle } from "@/components/TriStateToggle";
 import { Button } from "@/components/ui/button";
@@ -23,15 +24,10 @@ import {
   toggleLearningMode,
   toggleVisibleParent,
 } from "@/global/flashcardSlice";
-import { useFlashcardHandler } from "@/hooks/useFlashcardHandler";
 import { LEARNING_MODES } from "@/types/types";
 
-const ControlArea = ({
-  flashcardHandler,
-}: {
-  flashcardHandler: ReturnType<typeof useFlashcardHandler>;
-}) => {
-  const { flashcardAPI, handleDeleteAllTranslations } = flashcardHandler;
+const ControlArea = () => {
+  const { flashcardAPI, handleDeleteAllTranslations } = useFlashcardContextHandler();
   const [conditionDate, setConditionDate] = useState("");
   const { learningMode, isLearningMode, isVisibleParent } = useSelector<
     RootState,
@@ -41,7 +37,7 @@ const ControlArea = ({
 
   useLiveQuery(async () => {
     if(!conditionDate)return;
-    
+
     const result = await db.vocabulary
       ?.where("timestamp")
       .startsWith(conditionDate)
@@ -135,8 +131,6 @@ const ControlArea = ({
  * @returns ボキャブラリーページのReactコンポーネント
  */
 export default function Vocabulary() {
-  const flashcardHandler = useFlashcardHandler("vocabulary");
-
   return (
     <div className="min-h-screen bg-blue-50 flex flex-col items-center">
       {/* メインのカードコンテナ */}
@@ -144,7 +138,8 @@ export default function Vocabulary() {
         {/* ヘッダー部分 */}
         <Header english="Vocabulary" japanese="単語帳" />
         {/* コントローラ部分 */}
-        <ControlArea flashcardHandler={flashcardHandler} />
+        {/* <ControlArea flashcardHandler={flashcardHandler} /> */}
+        <ControlArea />
         <div
           className="p-2 pt-0 overflow-y-auto"
           style={{
@@ -156,8 +151,8 @@ export default function Vocabulary() {
           }}
         >
           {/* 翻訳履歴の表示 */}
-          <Flashcard flashcardHandler={flashcardHandler} isGroupedView={true} />
-          {/* <Flashcard isGroupedView={true} /> */}
+          {/* <Flashcard flashcardHandler={flashcardHandler} isGroupedView={true} /> */}
+          <Flashcard isGroupedView={true} />
         </div>
       </div>
     </div>
