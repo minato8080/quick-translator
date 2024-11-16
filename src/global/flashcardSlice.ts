@@ -16,8 +16,10 @@ type FlashcardState = {
   screenMode: ScreenMode;
   saveInfo: {
     saved: boolean;
-    value: boolean;
-    watch: boolean[];
+    data: {
+      value: boolean;
+      watch: boolean;
+    }[];
   };
 };
 
@@ -29,8 +31,7 @@ const initialState: FlashcardState = {
   screenMode: "translate",
   saveInfo: {
     saved: true,
-    value: true,
-    watch: [],
+    data: [],
   },
 };
 
@@ -40,10 +41,9 @@ const slice = createSlice({
   reducers: {
     changeFlashcard: (state, action) => {
       state.flashcard = action.payload;
-      while (state.saveInfo.watch.length < action.payload.length) {
-        state.saveInfo.watch.unshift(true);
+      while (state.saveInfo.data.length < action.payload.length) {
+        state.saveInfo.data.unshift({ value: true, watch: true });
       }
-      console.log(state.saveInfo.watch);
       state.saveInfo.saved = true;
     },
     changeFlashcardLeef: (state, action) => {
@@ -53,16 +53,17 @@ const slice = createSlice({
     addFlashcardLeef: (state, action) => {
       state.flashcard = [action.payload, ...state.flashcard];
       state.saveInfo.saved = false;
-      state.saveInfo.watch = [false, ...state.saveInfo.watch];
+      state.saveInfo.data = [
+        { value: false, watch: false },
+        ...state.saveInfo.data,
+      ];
     },
     changeSaveInfo: (state, action) => {
       state.saveInfo.saved = action.payload;
     },
     deleteFlashcardLeef: (state, action) => {
-      state.flashcard = state.flashcard.filter(
-        (_, i) => i !== action.payload
-      );
-      state.saveInfo.watch = state.saveInfo.watch.filter(
+      state.flashcard = state.flashcard.filter((_, i) => i !== action.payload);
+      state.saveInfo.data = state.saveInfo.data.filter(
         (_, i) => i !== action.payload
       );
     },
@@ -80,7 +81,10 @@ const slice = createSlice({
       state.screenMode = action.payload;
     },
     informSaveAll: (state) => {
-      state.saveInfo.watch = state.saveInfo.watch.map((prev) => !prev);
+      state.saveInfo.data = state.saveInfo.data.map((prev) => ({
+        value: true,
+        watch: !prev.watch,
+      }));
       state.saveInfo.saved = true;
     },
   },

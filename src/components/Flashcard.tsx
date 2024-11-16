@@ -224,10 +224,10 @@ const CardLeef = ({
     if (isLearningMode) setIsEditing(false);
   }, [isLearningMode]);
   useEffect(() => {
-    setIsSaved(saveInfo.watch[index]);
+    setIsSaved(saveInfo.data[index].value);
     setIsEditing(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [saveInfo.watch[index]]);
+  }, [saveInfo.data[index].watch]);
 
   return (
     <motion.div
@@ -288,8 +288,6 @@ const CardLeef = ({
                             () => {
                               setIsSaved(true);
                               setIsEditing(false);
-                              // flashcardAPI.current.flashcard[index].saved =
-                              //   true;
                             }
                           )
                         }

@@ -151,7 +151,7 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
           targetLang: item.targetLang,
           timestamp: item.timestamp,
         }));
-      await db.vocabulary.bulkAdd(unsavedFlashcard);
+      await db.vocabulary.bulkPut(unsavedFlashcard);
 
       const dates: string[] = Array.from(
         new Set(
