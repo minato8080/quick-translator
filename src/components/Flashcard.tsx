@@ -14,9 +14,7 @@ import { useFlashcardContextHandler } from "./FlashcardHandler";
 import { Switch } from "./ui/switch";
 
 import type { AppDispatch, RootState } from "@/global/store";
-import type {
-  FlashcardAPI,
-} from "@/hooks/useFlashcardHandler";
+import type { FlashcardAPI } from "@/hooks/useFlashcardHandler";
 import type { FlashcardType, LearningMode } from "@/types/types";
 
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -325,8 +323,8 @@ const CardLeef = ({ item, index }: { item: FlashcardType; index: number }) => {
                           !isEditing;
                         dispatch(
                           changeSaveInfo(
-                            flashcardAPI.current.flashcard.every(
-                              (p) => !p.saved
+                            !flashcardAPI.current.flashcard.every(
+                              (p) => p.saved
                             )
                           )
                         );
