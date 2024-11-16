@@ -288,6 +288,8 @@ const CardLeef = ({
                             () => {
                               setIsSaved(true);
                               setIsEditing(false);
+                              // flashcardAPI.current.flashcard[index].saved =
+                              //   true;
                             }
                           )
                         }

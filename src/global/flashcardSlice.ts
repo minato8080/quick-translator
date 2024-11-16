@@ -40,12 +40,15 @@ const slice = createSlice({
   reducers: {
     changeFlashcard: (state, action) => {
       state.flashcard = action.payload;
-      state.saveInfo.watch = new Array(action.payload.length).fill(true);
+      while (state.saveInfo.watch.length < action.payload.length) {
+        state.saveInfo.watch.unshift(true);
+      }
+      console.log(state.saveInfo.watch);
+      state.saveInfo.saved = true;
     },
     changeFlashcardLeef: (state, action) => {
       const { data, index } = action.payload;
       state.flashcard[index] = data;
-      state.saveInfo.saved = false;
     },
     addFlashcardLeef: (state, action) => {
       state.flashcard = [action.payload, ...state.flashcard];
@@ -80,11 +83,6 @@ const slice = createSlice({
       state.saveInfo.watch = state.saveInfo.watch.map((prev) => !prev);
       state.saveInfo.saved = true;
     },
-    informSaveTarget: (state, action) => {
-      state.saveInfo.watch[action.payload] =
-        !state.saveInfo.watch[action.payload];
-      state.saveInfo.saved = state.saveInfo.watch.every((elem) => elem);
-    },
   },
 });
 
@@ -99,6 +97,5 @@ export const {
   changeLearningMode,
   changeScreenMode,
   informSaveAll,
-  informSaveTarget,
 } = slice.actions;
 export const flashcardReducer = slice.reducer;

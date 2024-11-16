@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 
-import { format } from "date-fns";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Book, Edit, Eye, EyeOff, SquareX } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
@@ -25,30 +24,34 @@ import {
   toggleVisibleParent,
 } from "@/global/flashcardSlice";
 import { useFlashcardHandler } from "@/hooks/useFlashcardHandler";
-import { FORMAT, LEARNING_MODES } from "@/types/types";
+import { LEARNING_MODES } from "@/types/types";
 
 const ControlArea = ({
   flashcardHandler,
 }: {
   flashcardHandler: ReturnType<typeof useFlashcardHandler>;
 }) => {
-  const { handleDeleteAllTranslations } = flashcardHandler;
-  const [conditionDate, setConditionDate] = useState(
-    format(new Date(), FORMAT.DATE)
-  );
+  const { flashcardAPI, handleDeleteAllTranslations } = flashcardHandler;
+  const [conditionDate, setConditionDate] = useState("");
   const { learningMode, isLearningMode, isVisibleParent } = useSelector<
     RootState,
     RootState[typeof FLASHCARD_SLICE_NAME]
-  >((state) => state.flashcard);
+  >((state: RootState) => state.flashcard);
   const dispatch = useDispatch<AppDispatch>();
 
   useLiveQuery(async () => {
+    if(!conditionDate)return;
+    
     const result = await db.vocabulary
       ?.where("timestamp")
       .startsWith(conditionDate)
       .sortBy("timestamp")
       .then((res) => res.reverse());
     dispatch(changeFlashcard(result));
+    flashcardAPI.current.flashcard = result.map((item) => ({
+      ...item,
+      saved: true,
+    }));
   }, [conditionDate]);
   return (
     <div>

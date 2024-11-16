@@ -124,7 +124,7 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
         })
       );
       dispatch(
-        changeSaveInfo(flashcardAPI.current.flashcard.every((p) => !p.saved))
+        changeSaveInfo(!flashcardAPI.current.flashcard.every((p) => p.saved))
       );
       success?.();
     } catch (error) {
@@ -143,9 +143,7 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
   const handleSaveAllTranslations = async (success?: () => void) => {
     try {
       const unsavedFlashcard = flashcardAPI.current.flashcard
-        .filter(
-          (_card, index) => !flashcardAPI.current.flashcard[index].saved
-        )
+        .filter((_card, index) => !flashcardAPI.current.flashcard[index].saved)
         .map((item) => ({
           input: item.input,
           output: item.output,
