@@ -1,6 +1,6 @@
 "use client";
 
-import type { SetStateAction } from "react";
+import type { MutableRefObject, SetStateAction } from "react";
 import { useEffect, useState } from "react";
 import React from "react";
 
@@ -8,15 +8,25 @@ import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, RotateCcw, Save, Edit, Check, Eye, EyeOff } from "lucide-react";
 import { Volume2 } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
 
 import { Switch } from "./ui/switch";
 
-import type { useFlashcardHandler } from "@/hooks/useFlashcardHandler";
+import type { AppDispatch, RootState } from "@/global/store";
+import type {
+  FlashcardAPI,
+  useFlashcardHandler,
+} from "@/hooks/useFlashcardHandler";
 import type { FlashcardType, LearningMode } from "@/types/types";
 
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  changeSaveInfo,
+  deleteFlashcardLeef,
+  type FLASHCARD_SLICE_NAME,
+} from "@/global/flashcardSlice";
 import { languages } from "@/types/types";
 
 type IOType = "input" | "output";
@@ -119,35 +129,44 @@ const switchSpeaker = (
 const EditableText = ({
   io,
   item,
-  editingText,
-  setEditingText,
-  isLearningMode,
-  learningMode,
+  isVisible,
+  isEditing,
+  index,
+  flashcardAPI,
 }: {
   io: IOType;
   item: FlashcardType;
-  editingText: FlashcardType | null;
-  setEditingText: React.Dispatch<
-    SetStateAction<
-      | (FlashcardType & {
-          index: number;
-        })
-      | null
-    >
-  >;
-  isLearningMode: boolean;
-  learningMode: LearningMode;
+  isVisible: boolean;
+  isEditing: boolean;
+  index: number;
+  flashcardAPI: MutableRefObject<FlashcardAPI>;
 }) => {
+  const { flashcard } = useSelector<
+    RootState,
+    RootState[typeof FLASHCARD_SLICE_NAME]
+  >((state) => state.flashcard);
+  const { isLearningMode } = useSelector<
+    RootState,
+    RootState[typeof FLASHCARD_SLICE_NAME]
+  >((state) => state.flashcard);
+  const [editingText, setEditingText] = useState("");
+  useEffect(() => {
+    setEditingText(item[io]);
+  }, [item, io]);
+  useEffect(() => {
+    flashcardAPI.current.flashcard = JSON.parse(JSON.stringify(flashcard));
+  }, [flashcard, flashcardAPI]);
+
   return (
     <>
-      {item.editing ? (
+      {isEditing ? (
         <textarea
-          value={editingText ? editingText[io] : ""}
-          onChange={(e) =>
-            setEditingText((prev) =>
-              prev ? { ...prev, [io]: e.target.value } : null
-            )
-          }
+          value={editingText}
+          onChange={(e) => {
+            const value = e.target.value;
+            setEditingText(value);
+            flashcardAPI.current.flashcard[index][io] = value;
+          }}
           className="textarea field-sizing-content"
         />
       ) : (
@@ -155,12 +174,12 @@ const EditableText = ({
           className={`${
             !isLearningMode
               ? "text-gray-800"
-              : switchIO(learningMode, item, io) === "output" && !item.visible
+              : io === "output" && !isVisible
               ? "text-transparent"
               : "text-gray-800"
           } textarea field-sizing-content bg-white border-white`}
           disabled={true}
-          value={item[isLearningMode ? io : switchIO(learningMode, item, io)]}
+          value={item[io]}
         />
       )}
     </>
@@ -178,27 +197,37 @@ const EditableText = ({
 const CardLeef = ({
   flashcardHandler,
   item,
-  startIndex = 0,
-  divisionIndex,
-  isLearningMode,
-  learningMode,
+  index,
 }: {
   flashcardHandler: ReturnType<typeof useFlashcardHandler>;
   item: FlashcardType;
-  startIndex?: number;
-  divisionIndex: number;
-  isLearningMode: boolean;
-  learningMode: LearningMode;
+  index: number;
 }) => {
   const {
-    editingText,
-    setEditingText,
-    setFlashcards,
-    handleSaveTranslation,
-    handleDeleteTranslation,
-    handleEditTranslation,
-    handleCancelEdit,
-  } = flashcardHandler;
+    learningMode,
+    isLearningMode,
+    isVisibleParent,
+    screenMode,
+    saveInfo,
+  } = useSelector<RootState, RootState[typeof FLASHCARD_SLICE_NAME]>(
+    (state) => state.flashcard
+  );
+  const dispatch = useDispatch<AppDispatch>();
+
+  const [isVisible, setIsVisible] = useState(true);
+  const [isSaved, setIsSaved] = useState(screenMode === "vocabulary");
+  const [isEditing, setIsEditing] = useState(false);
+  const { flashcardAPI, handleSaveTranslation, handleDeleteTranslation } =
+    flashcardHandler;
+  useEffect(() => setIsVisible(isVisibleParent), [isVisibleParent]);
+  useEffect(() => {
+    if (isLearningMode) setIsEditing(false);
+  }, [isLearningMode]);
+  useEffect(() => {
+    setIsSaved(saveInfo.watch[index]);
+    setIsEditing(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [saveInfo.watch[index]]);
 
   return (
     <motion.div
@@ -221,35 +250,23 @@ const CardLeef = ({
               <div className="flex space-x-1">
                 {isLearningMode ? (
                   <motion.div
-                    key={
-                      item.editing
-                        ? "editing"
-                        : item.saved
-                        ? "saved"
-                        : "unsaved"
-                    }
+                    key={isEditing ? "editing" : isSaved ? "saved" : "unsaved"}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
                   >
                     <div className="flex items-center space-x-2 h-4">
-                      {item.visible ? (
+                      {isVisible ? (
                         <Eye className="h-4 w-4 text-blue-600" />
                       ) : (
                         <EyeOff className="h-4 w-4 text-blue-400" />
                       )}
                       <Switch
                         id="text-area-toggle"
-                        checked={item.visible}
-                        onCheckedChange={(checked) => {
-                          setFlashcards((prev) =>
-                            prev.map((flashcard) =>
-                              flashcard.timestamp === item.timestamp
-                                ? { ...flashcard, visible: checked }
-                                : flashcard
-                            )
-                          );
+                        checked={isVisible}
+                        onCheckedChange={() => {
+                          setIsVisible((b) => !b);
                         }}
                         className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-blue-400"
                       />
@@ -263,15 +280,24 @@ const CardLeef = ({
                         variant="ghost"
                         size="sm"
                         onClick={() =>
-                          handleSaveTranslation(startIndex + divisionIndex)
+                          handleSaveTranslation(
+                            isEditing
+                              ? flashcardAPI.current.flashcard[index]
+                              : item,
+                            index,
+                            () => {
+                              setIsSaved(true);
+                              setIsEditing(false);
+                            }
+                          )
                         }
-                        disabled={item.editing ? false : item.saved}
+                        disabled={isEditing ? false : isSaved}
                       >
                         <motion.div
                           key={
-                            item.editing
+                            isEditing
                               ? "unsaved"
-                              : item.saved
+                              : isSaved
                               ? "saved"
                               : "unsaved"
                           }
@@ -280,18 +306,18 @@ const CardLeef = ({
                           exit={{ opacity: 0, rotate: 180 }}
                           transition={{ duration: 0.3 }}
                         >
-                          {item.editing ? (
+                          {isEditing ? (
                             <Save className="h-4 w-4 text-blue-600" />
-                          ) : item.saved ? (
+                          ) : isSaved ? (
                             <Check className="h-4 w-4 text-blue-400" />
                           ) : (
                             <Save className="h-4 w-4 text-blue-600" />
                           )}
                         </motion.div>
                         <span className="sr-only">
-                          {item.editing
+                          {isEditing
                             ? "Save changes"
-                            : item.saved
+                            : isSaved
                             ? "Saved"
                             : "Save translation"}
                         </span>
@@ -301,33 +327,36 @@ const CardLeef = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() =>
-                        item.editing
-                          ? handleCancelEdit()
-                          : handleEditTranslation(startIndex + divisionIndex)
-                      }
+                      onClick={() => {
+                        setIsEditing((p) => !p);
+                        flashcardAPI.current.flashcard[index].saved =
+                          !isEditing;
+                        dispatch(
+                          changeSaveInfo(
+                            flashcardAPI.current.flashcard.every(
+                              (p) => !p.saved
+                            )
+                          )
+                        );
+                      }}
                     >
                       <motion.div
                         key={
-                          item.editing
-                            ? "editing"
-                            : item.saved
-                            ? "saved"
-                            : "unsaved"
+                          isEditing ? "editing" : isSaved ? "saved" : "unsaved"
                         }
                         initial={{ opacity: 0, rotate: -180 }}
                         animate={{ opacity: 1, rotate: 0 }}
                         exit={{ opacity: 0, rotate: 180 }}
                         transition={{ duration: 0.3 }}
                       >
-                        {item.editing ? (
+                        {isEditing ? (
                           <RotateCcw className="h-4 w-4 text-teal-600" />
                         ) : (
                           <Edit className="h-4 w-4 text-teal-600" />
                         )}
                       </motion.div>
                       <span className="sr-only">
-                        {item.editing ? "Cancel edit" : "Edit translation"}
+                        {isEditing ? "Cancel edit" : "Edit translation"}
                       </span>
                     </Button>
                     {/* 翻訳の削除ボタン */}
@@ -335,8 +364,13 @@ const CardLeef = ({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() =>
-                          handleDeleteTranslation(startIndex + divisionIndex)
+                        onClick={
+                          () =>
+                            handleDeleteTranslation(index, () => {
+                              if (screenMode === "translate")
+                                dispatch(deleteFlashcardLeef(index));
+                            })
+                          // dispatch(deleteTranslation({ index, toast }))
                         }
                       >
                         <X className="h-4 w-4 text-pink-600" />
@@ -355,10 +389,10 @@ const CardLeef = ({
             <EditableText
               io={switchIO(learningMode, item, "input")}
               item={item}
-              editingText={editingText}
-              setEditingText={setEditingText}
-              isLearningMode={isLearningMode}
-              learningMode={learningMode}
+              isVisible={isVisible}
+              isEditing={isEditing}
+              index={index}
+              flashcardAPI={flashcardAPI}
             />
             <SpeakerButton
               text={item[switchIO(learningMode, item, "input")]}
@@ -370,10 +404,10 @@ const CardLeef = ({
             <EditableText
               io={switchIO(learningMode, item, "output")}
               item={item}
-              editingText={editingText}
-              setEditingText={setEditingText}
-              isLearningMode={isLearningMode}
-              learningMode={learningMode}
+              isVisible={isVisible}
+              isEditing={isEditing}
+              index={index}
+              flashcardAPI={flashcardAPI}
             />
             <SpeakerButton
               text={item[switchIO(learningMode, item, "output")]}
@@ -398,26 +432,19 @@ const CardCore = ({
   flashcardHandler,
   items,
   startIndex = 0,
-  isLearningMode,
-  learningMode,
 }: {
   flashcardHandler: ReturnType<typeof useFlashcardHandler>;
   items: FlashcardType[];
   startIndex?: number;
-  isLearningMode: boolean;
-  learningMode: LearningMode;
 }) => {
   return (
     <>
       {items.map((item, divisionIndex) => (
         <CardLeef
-          key={startIndex + divisionIndex}
-          startIndex={startIndex}
-          divisionIndex={divisionIndex}
+          key={item.timestamp}
+          index={startIndex + divisionIndex}
           flashcardHandler={flashcardHandler}
           item={item}
-          isLearningMode={isLearningMode}
-          learningMode={learningMode}
         />
       ))}
     </>
@@ -435,33 +462,32 @@ export const Flashcard = React.memo(
   ({
     flashcardHandler,
     isGroupedView,
-    isLearningMode = false,
-    learningMode,
   }: {
     flashcardHandler: ReturnType<typeof useFlashcardHandler>;
     isGroupedView: boolean;
-    isLearningMode?: boolean;
-    learningMode: LearningMode;
   }) => {
-    const { flashcards } = flashcardHandler;
+    const { flashcard } = useSelector<
+      RootState,
+      RootState[typeof FLASHCARD_SLICE_NAME]
+    >((state) => state.flashcard);
     const [groupedHistory, setGroupedHistory] = useState<
       Record<string, FlashcardType[]>
     >({});
 
     useEffect(() => {
       if (isGroupedView) {
-        const newGroupedHistory = flashcards.reduce((acc, item) => {
+        const newGroupedHistory = flashcard.reduce((acc, item) => {
           const date = format(new Date(item.timestamp), "yyyy/MM/dd");
           if (!acc[date]) {
             acc[date] = [];
           }
           acc[date].push(item);
           return acc;
-        }, {} as Record<string, typeof flashcards>);
+        }, {} as Record<string, typeof flashcard>);
         setGroupedHistory(newGroupedHistory);
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [flashcards]);
+    }, [flashcard]);
 
     return (
       <AnimatePresence>
@@ -489,18 +515,12 @@ export const Flashcard = React.memo(
                     indexAdjuster += items.length;
                     return index;
                   })()}
-                  isLearningMode={isLearningMode}
-                  learningMode={learningMode}
                 />
               </motion.div>
             )))()
         ) : (
-          <CardCore
-            items={flashcards}
-            flashcardHandler={flashcardHandler}
-            isLearningMode={isLearningMode}
-            learningMode={learningMode}
-          />
+          <CardCore items={flashcard} flashcardHandler={flashcardHandler} />
+          // <CardCore items={flashcard} />
         )}
       </AnimatePresence>
     );

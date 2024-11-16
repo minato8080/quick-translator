@@ -26,10 +26,7 @@ export type FlashcardType = {
   output: string;
   sourceLang: LanguagesKeys;
   targetLang: LanguagesKeys;
-  saved: boolean;
-  editing: boolean;
   timestamp: string;
-  visible: boolean;
 };
 
 /**

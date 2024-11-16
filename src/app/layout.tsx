@@ -1,9 +1,9 @@
 import localFont from "next/font/local";
 
+import Providers from "./providers";
+
 import type { Metadata } from "next";
 
-import { Toaster } from "@/components/ui/toaster";
-import { AlertProvider } from "@/provider/AlertProvider";
 import "./globals.css";
 
 const geistSans = localFont({
@@ -33,10 +33,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden`}
       >
         <main>
-          <AlertProvider>
-            {children}
-            <Toaster />
-          </AlertProvider>
+          <Providers>{children}</Providers>
         </main>
       </body>
     </html>
