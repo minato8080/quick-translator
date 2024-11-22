@@ -47,6 +47,7 @@ const ControlArea = () => {
     flashcardAPI.current.flashcard = result.map((item) => ({
       ...item,
       saved: true,
+      editing: false,
     }));
   }, [conditionDate]);
   return (

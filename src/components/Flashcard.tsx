@@ -150,7 +150,7 @@ const EditableText = ({
   const [editingText, setEditingText] = useState("");
   useEffect(() => {
     setEditingText(item[io]);
-  }, [item, io]);
+  }, [item, io, isEditing]);
   useEffect(() => {
     flashcardAPI.current.flashcard = JSON.parse(JSON.stringify(flashcard));
   }, [flashcard, flashcardAPI]);
@@ -318,16 +318,21 @@ const CardLeef = ({ item, index }: { item: FlashcardType; index: number }) => {
                       variant="ghost"
                       size="sm"
                       onClick={() => {
+                        // 編集モードを切り替える
                         setIsEditing((p) => !p);
-                        flashcardAPI.current.flashcard[index].saved =
+                        // フラッシュカードAPIの編集状態を更新
+                        flashcardAPI.current.flashcard[index].editing =
                           !isEditing;
-                        dispatch(
-                          changeSaveInfo(
-                            !flashcardAPI.current.flashcard.every(
-                              (p) => p.saved
+                        if (screenMode === "translate") {
+                          // 保存情報を更新
+                          dispatch(
+                            changeSaveInfo(
+                              flashcardAPI.current.flashcard.every(
+                                (p) => !p.saved || p.editing
+                              )
                             )
-                          )
-                        );
+                          );
+                        }
                       }}
                     >
                       <motion.div

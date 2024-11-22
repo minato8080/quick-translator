@@ -20,7 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { FORMAT } from "@/types/types";
 
 export type FlashcardAPI = {
-  flashcard: (FlashcardType & { saved: boolean })[];
+  flashcard: (FlashcardType & { saved: boolean; editing: boolean })[];
 };
 
 /**
@@ -54,11 +54,11 @@ export const useFlashcardHandler = () => {
         sourceLang: sourceLang,
         targetLang: targetLang,
         saved: false,
+        editing: false,
         timestamp: format(new Date(), FORMAT.TIMESTAMP),
       },
       ...flashcardAPI.current.flashcard,
     ];
-    // dispatch(informEditCancel());
     dispatch(
       addFlashcardLeef({
         input: inputText,
@@ -117,15 +117,22 @@ export const useFlashcardHandler = () => {
         style: TOAST_STYLE,
       });
       flashcardAPI.current.flashcard[index].saved = true;
+
       dispatch(
         changeFlashcardLeef({
           data: flashcardAPI.current.flashcard[index],
           index,
         })
       );
-      dispatch(
-        changeSaveInfo(!flashcardAPI.current.flashcard.every((p) => p.saved))
-      );
+
+      if (screenMode === "translate") {
+        dispatch(
+          changeSaveInfo(
+            flashcardAPI.current.flashcard.every((p) => !p.saved || p.editing)
+          )
+        );
+      }
+
       success?.();
     } catch (error) {
       toast({
@@ -176,6 +183,10 @@ export const useFlashcardHandler = () => {
           count: sameDateEntries,
         });
       }
+      flashcardAPI.current.flashcard.forEach((card) => {
+        card.saved = true;
+        card.editing = false;
+      });
       dispatch(informSaveAll());
       dispatch(changeFlashcard(flashcardAPI.current.flashcard));
       toast({
@@ -202,7 +213,6 @@ export const useFlashcardHandler = () => {
     index: number,
     success?: () => void
   ) => {
-    // dispatch(informEditCancel());
     try {
       await db.vocabulary.delete(flashcard[index].timestamp);
 
@@ -248,7 +258,6 @@ export const useFlashcardHandler = () => {
    * すべての表示中の翻訳を削除する関数
    */
   const handleDeleteAllTranslations = async (condition: string) => {
-    // dispatch(informEditCancel());
     try {
       // データベースから削除
       await db.vocabulary.where("timestamp").startsWith(condition).delete();
