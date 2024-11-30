@@ -4,8 +4,7 @@ import { format, parse } from "date-fns";
 import { useDispatch, useSelector } from "react-redux";
 
 import type { AppDispatch, RootState } from "@/global/store";
-import type { TRANSLATE_SLICE_NAME } from "@/global/translateSlice";
-import type { FlashcardType } from "@/types/types";
+import type { FlashcardType, LanguagesKeys } from "@/types/types";
 
 import { db } from "@/global/dexieDB";
 import {
@@ -17,7 +16,6 @@ import {
   type FLASHCARD_SLICE_NAME,
 } from "@/global/flashcardSlice";
 import { TOAST_STYLE } from "@/global/style";
-import { changeInput, changeOutput } from "@/global/translateSlice";
 import { useToast } from "@/hooks/use-toast";
 import { FORMAT } from "@/types/types";
 
@@ -31,11 +29,6 @@ export type FlashcardAPI = {
  */
 export const useFlashcardHandler = () => {
   const { toast } = useToast();
-
-  const { input, output, loading, sourceLang, targetLang } = useSelector<
-    RootState,
-    RootState[typeof TRANSLATE_SLICE_NAME]
-  >((state) => state.translate);
   
   const { flashcard, screenMode } = useSelector<
     RootState,
@@ -51,35 +44,36 @@ export const useFlashcardHandler = () => {
   /**
    * 翻訳履歴に追加する関数
    */
-  const handleAddTranslation = () => {
-    if (input && output && !loading) {
-      flashcardAPI.current.flashcard = [
-        {
-          input,
-          output,
-          sourceLang: sourceLang,
-          targetLang: targetLang,
-          saved: false,
-          editing: false,
-          timestamp: format(new Date(), FORMAT.TIMESTAMP),
-        },
-        ...flashcardAPI.current.flashcard,
-      ];
-      dispatch(
-        addFlashcardLeef({
-          input,
-          output,
-          sourceLang: sourceLang,
-          targetLang: targetLang,
-          saved: false,
-          editing: false,
-          visible: true,
-          timestamp: format(new Date(), FORMAT.TIMESTAMP),
-        })
-      );
-      dispatch(changeInput(""));
-      dispatch(changeOutput(""));
-    }
+  const handleAddTranslation = (
+    inputText: string,
+    translatedText: string,
+    sourceLang: LanguagesKeys,
+    targetLang: LanguagesKeys
+  ) => {
+    flashcardAPI.current.flashcard = [
+      {
+        input: inputText,
+        output: translatedText,
+        sourceLang: sourceLang,
+        targetLang: targetLang,
+        saved: false,
+        editing: false,
+        timestamp: format(new Date(), FORMAT.TIMESTAMP),
+      },
+      ...flashcardAPI.current.flashcard,
+    ];
+    dispatch(
+      addFlashcardLeef({
+        input: inputText,
+        output: translatedText,
+        sourceLang: sourceLang,
+        targetLang: targetLang,
+        saved: false,
+        editing: false,
+        visible: true,
+        timestamp: format(new Date(), FORMAT.TIMESTAMP),
+      })
+    );
   };
 
   /**
