@@ -365,7 +365,6 @@ const CardLeef = ({ item, index }: { item: FlashcardType; index: number }) => {
                               if (screenMode === "translate")
                                 dispatch(deleteFlashcardLeef(index));
                             })
-                          // dispatch(deleteTranslation({ index, toast }))
                         }
                       >
                         <X className="h-4 w-4 text-pink-600" />

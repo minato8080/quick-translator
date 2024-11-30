@@ -57,11 +57,8 @@ const SaveAllButton = () => {
   );
 };
 
-const InputTextarea = ({
-  handleAddToHistory,
-}: {
-  handleAddToHistory: () => void;
-}) => {
+const InputTextarea = () => {
+  const { handleAddTranslation } = useFlashcardContextHandler();
   const { input, output, loading, sourceLang, targetLang } = useSelector<
     RootState,
     RootState[typeof TRANSLATE_SLICE_NAME]
@@ -150,9 +147,10 @@ const InputTextarea = ({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleAddToHistory();
+      handleAddTranslation();
     }
   };
+
   return (
     <>
       <textarea
@@ -265,17 +263,6 @@ const InputArea = () => {
     setRotate((prev) => prev + 180);
   };
 
-  /**
-   * 翻訳履歴に追加する関数
-   */
-  const handleAddToHistory = () => {
-    if (input && output && !loading) {
-      handleAddTranslation(input, output, sourceLang, targetLang);
-      dispatch(changeInput(""));
-      dispatch(changeOutput(""));
-    }
-  };
-
   return (
     <Card className="fixed bottom-0 w-full max-w-3xl">
       <CardContent className="p-4">
@@ -320,7 +307,7 @@ const InputArea = () => {
           </AnimatePresence>
         </div>
         {/* 翻訳するテキストを入力するテキストエリア */}
-        <InputTextarea handleAddToHistory={handleAddToHistory} />
+        <InputTextarea />
         <div className="flex justify-end mt-2 space-x-4">
           {/* 高精度の翻訳を行うボタン */}
           <Button
@@ -349,7 +336,7 @@ const InputArea = () => {
             variant="outline"
             size="sm"
             className="hover:bg-gray-600 text-[14px] w-20"
-            onClick={handleAddToHistory}
+            onClick={handleAddTranslation}
             disabled={input === ""}
           >
             Submit
