@@ -153,7 +153,8 @@ const EditableText = ({
   }, [item, io, isEditing]);
   useEffect(() => {
     flashcardAPI.current.flashcard = JSON.parse(JSON.stringify(flashcard));
-  }, [flashcard, flashcardAPI]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flashcard]);
 
   return (
     <>
@@ -214,10 +215,11 @@ const CardLeef = ({ item, index }: { item: FlashcardType; index: number }) => {
     if (isLearningMode) setIsEditing(false);
   }, [isLearningMode]);
   useEffect(() => {
-    setIsSaved(saveInfo.data[index].value);
+    // リセット時に参照が切り替わるので?でアクセスする
+    setIsSaved(saveInfo.data[index]?.value);
     setIsEditing(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [saveInfo.data[index].watch]);
+  }, [saveInfo.data[index]?.watch]);
 
   return (
     <motion.div
@@ -359,12 +361,11 @@ const CardLeef = ({ item, index }: { item: FlashcardType; index: number }) => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={
-                          () =>
-                            handleDeleteTranslation(index, () => {
-                              if (screenMode === "translate")
-                                dispatch(deleteFlashcardLeef(index));
-                            })
+                        onClick={() =>
+                          handleDeleteTranslation(index, () => {
+                            if (screenMode === "translate")
+                              dispatch(deleteFlashcardLeef(index));
+                          })
                         }
                       >
                         <X className="h-4 w-4 text-pink-600" />

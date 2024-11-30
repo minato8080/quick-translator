@@ -84,15 +84,17 @@ const slice = createSlice({
       state.saveInfo.saved = true;
     },
     resetFlashcard: (state, action) => {
-      state.flashcard = [];
-      state.isLearningMode = action.payload !== "translate";
-      state.isVisibleParent = true;
-      state.learningMode = "origin";
-      state.screenMode = action.payload;
-      state.saveInfo = {
-        saved: true,
-        data: [],
-      };
+      Object.assign(state, {
+        flashcard: [],
+        isLearningMode: action.payload !== "translate",
+        isVisibleParent: true,
+        learningMode: "origin",
+        screenMode: action.payload,
+        saveInfo: {
+          saved: true,
+          data: [],
+        },
+      });
     },
   },
 });

@@ -31,27 +31,29 @@ const ControlArea = () => {
   const { flashcardAPI, handleDeleteAllTranslations } =
     useFlashcardContextHandler();
   const [conditionDate, setConditionDate] = useState("");
-  const { learningMode, isLearningMode, isVisibleParent } = useSelector<
-    RootState,
-    RootState[typeof FLASHCARD_SLICE_NAME]
-  >((state: RootState) => state.flashcard);
+  const { learningMode, isLearningMode, isVisibleParent, screenMode } =
+    useSelector<RootState, RootState[typeof FLASHCARD_SLICE_NAME]>(
+      (state: RootState) => state.flashcard
+    );
   const dispatch = useDispatch<AppDispatch>();
 
-  useLiveQuery(async () => {
+  useLiveQuery(() => {
     if (!conditionDate) return;
-
-    const result = await db.vocabulary
+    db.vocabulary
       ?.where("timestamp")
       .startsWith(conditionDate)
       .sortBy("timestamp")
-      .then((res) => res.reverse());
-    dispatch(changeFlashcard(result));
-    flashcardAPI.current.flashcard = result.map((item) => ({
-      ...item,
-      saved: true,
-      editing: false,
-    }));
-  }, [conditionDate]);
+      .then((result) => {
+        result.reverse();
+        dispatch(changeFlashcard(result));
+        flashcardAPI.current.flashcard = result.map((item) => ({
+          ...item,
+          saved: true,
+          editing: false,
+        }));
+      });
+  }, [conditionDate, screenMode]);
+
   return (
     <div>
       <div className="flex flex-wrap justify-between items-center m-1">
