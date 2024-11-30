@@ -76,16 +76,23 @@ const slice = createSlice({
     changeLearningMode: (state, action) => {
       state.learningMode = action.payload;
     },
-    changeScreenMode: (state, action) => {
-      state.isLearningMode = state.screenMode !== "translate";
-      state.screenMode = action.payload;
-    },
     informSaveAll: (state) => {
       state.saveInfo.data = state.saveInfo.data.map((prev) => ({
         value: true,
         watch: !prev.watch,
       }));
       state.saveInfo.saved = true;
+    },
+    resetFlashcard: (state, action) => {
+      state.flashcard = [];
+      state.isLearningMode = action.payload !== "translate";
+      state.isVisibleParent = true;
+      state.learningMode = "origin";
+      state.screenMode = action.payload;
+      state.saveInfo = {
+        saved: true,
+        data: [],
+      };
     },
   },
 });
@@ -99,7 +106,7 @@ export const {
   toggleLearningMode,
   toggleVisibleParent,
   changeLearningMode,
-  changeScreenMode,
   informSaveAll,
+  resetFlashcard,
 } = slice.actions;
 export const flashcardReducer = slice.reducer;

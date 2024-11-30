@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useLayoutEffect } from "react";
 import React from "react";
 
 import axios from "axios";
@@ -23,7 +23,7 @@ import { useFlashcardContextHandler } from "@/components/FlashcardHandler";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { changeScreenMode } from "@/global/flashcardSlice";
+import { resetFlashcard } from "@/global/flashcardSlice";
 import { TOAST_STYLE } from "@/global/style";
 import { useToast } from "@/hooks/use-toast";
 import { useAlertPopup } from "@/hooks/useAlertPopup";
@@ -214,14 +214,10 @@ const InputArea = () => {
     loading: false,
   });
   const { input, output, sourceLang, targetLang, loading } = translationState;
-  const dispatch = useDispatch<AppDispatch>();
   const [rotate, setRotate] = useState(0);
   const { toast } = useToast();
   const { showAlert } = useAlertPopup();
   const { handleAddTranslation } = useFlashcardContextHandler();
-  useEffect(() => {
-    dispatch(changeScreenMode("translate"));
-  }, [dispatch]);
 
   /**
    * 高精度の翻訳関数
@@ -394,6 +390,12 @@ const InputArea = () => {
  * 翻訳コンポーネント
  */
 export default function Translate() {
+  const dispatch = useDispatch<AppDispatch>();
+
+  useLayoutEffect(() => {
+    dispatch(resetFlashcard("translate"));
+  }, [dispatch]);
+
   return (
     <div className="min-h-screen bg-blue-50 flex flex-col items-center">
       {/* メインのカードコンテナ */}

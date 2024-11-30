@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useLayoutEffect, useState } from "react";
 
 import { useLiveQuery } from "dexie-react-hooks";
 import { Book, Edit, Eye, EyeOff, SquareX } from "lucide-react";
@@ -21,13 +21,15 @@ import { db } from "@/global/dexieDB";
 import {
   changeFlashcard,
   changeLearningMode,
+  resetFlashcard,
   toggleLearningMode,
   toggleVisibleParent,
 } from "@/global/flashcardSlice";
 import { LEARNING_MODES } from "@/types/types";
 
 const ControlArea = () => {
-  const { flashcardAPI, handleDeleteAllTranslations } = useFlashcardContextHandler();
+  const { flashcardAPI, handleDeleteAllTranslations } =
+    useFlashcardContextHandler();
   const [conditionDate, setConditionDate] = useState("");
   const { learningMode, isLearningMode, isVisibleParent } = useSelector<
     RootState,
@@ -36,7 +38,7 @@ const ControlArea = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   useLiveQuery(async () => {
-    if(!conditionDate)return;
+    if (!conditionDate) return;
 
     const result = await db.vocabulary
       ?.where("timestamp")
@@ -132,6 +134,12 @@ const ControlArea = () => {
  * @returns ボキャブラリーページのReactコンポーネント
  */
 export default function Vocabulary() {
+  const dispatch = useDispatch<AppDispatch>();
+
+  useLayoutEffect(() => {
+    dispatch(resetFlashcard("vocabulary"));
+  }, [dispatch]);
+
   return (
     <div className="min-h-screen bg-blue-50 flex flex-col items-center">
       {/* メインのカードコンテナ */}
@@ -152,7 +160,6 @@ export default function Vocabulary() {
           }}
         >
           {/* 翻訳履歴の表示 */}
-          {/* <Flashcard flashcardHandler={flashcardHandler} isGroupedView={true} /> */}
           <Flashcard isGroupedView={true} />
         </div>
       </div>
