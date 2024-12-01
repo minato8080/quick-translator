@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import React from "react";
 
 import { motion, useAnimation } from "framer-motion";
@@ -71,7 +71,7 @@ const TranslateAnimation = ({
     if (displayText === "") {
       setCurrentTitle(japanese);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [displayText]);
 
   return (
@@ -89,74 +89,86 @@ const TranslateAnimation = ({
  * @param japanese - 日本語のタイトル
  * @returns ヘッダーUIをレンダリングするReactコンポーネント
  */
-export const Header = React.memo(({
-  english,
-  japanese,
-}: {
-  english: string;
-  japanese: string;
-}) => {
-  const router = useRouter();
-  const quickControls = useAnimation();
+export const Header = React.memo(
+  ({ english, japanese }: { english: string; japanese: string }) => {
+    const router = useRouter();
+    const quickControls = useAnimation();
+    const routerPushableRef = useRef(false);
 
-  useEffect(() => {
-    const animateQuick = async () => {
-      await quickControls.start({
-        rotate: 360 * 3,
-        transition: { duration: 0.6, ease: "easeInOut" },
-      });
-      await quickControls.start({
-        rotate: 360 * 3,
-        transition: { duration: 1.2, ease: "easeOut" },
-      });
-    };
-    animateQuick();
-  }, [quickControls]);
+    useEffect(() => {
+      (async () => {
+        await quickControls.start({
+          rotate: 360 * 3,
+          transition: { duration: 0.6, ease: "easeInOut" },
+        });
+        await quickControls.start({
+          rotate: 360 * 3,
+          transition: { duration: 1.2, ease: "easeOut" },
+        });
+        // レンダリングの完了を待ってからrouterを有効にする
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        routerPushableRef.current = true;
+      })();
+    }, [quickControls]);
 
-  return (
-    <div className="bg-blue-600 text-white p-2 pr-4 pl-4 flex justify-between items-center">
-      {/* アプリケーションのタイトル */}
-      <h1 className="text-2xl font-bold flex items-center">
-        <motion.span animate={quickControls} className="inline-block mr-2">
-          Quick
-        </motion.span>
-        <TranslateAnimation english={english} japanese={japanese} />
-      </h1>
-      <div className="flex items-center space-x-2">
-        {/* ドロップダウンメニュー */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="lg"
-              className="text-white hover:bg-blue-700 p-3 transition-all duration-200 ease-in-out"
-            >
-              <Menu size={24} />
-              <span className="sr-only">Menu</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {/* 翻訳画面への切り替え */}
-            <DropdownMenuItem
-              onClick={() => router.push("/translate")}
-              className="text-lg py-3 px-4 hover:bg-gray-300"
-            >
-              <ArrowRightLeft className="mr-3 h-6 w-6" />
-              <span>Translate</span>
-            </DropdownMenuItem>
-            {/* ボキャブラリー画面への切り替え */}
-            <DropdownMenuItem
-              onClick={() => router.push("/vocabulary")}
-              className="text-lg py-3 px-4 hover:bg-gray-300"
-            >
-              <Book className="mr-3 h-6 w-6" />
-              <span>Vocabulary</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+    async function attemptRouterPush(path: string) {
+      let maxAttempts = 30;
+      const delay = 100;
+
+      while (!routerPushableRef.current && maxAttempts > 0) {
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        maxAttempts--;
+      }
+      if (routerPushableRef.current) {
+        router.push(path);
+      }
+    }
+
+    return (
+      <div className="bg-blue-600 text-white p-2 pr-4 pl-4 flex justify-between items-center">
+        {/* アプリケーションのタイトル */}
+        <h1 className="text-2xl font-bold flex items-center">
+          <motion.span animate={quickControls} className="inline-block mr-2">
+            Quick
+          </motion.span>
+          <TranslateAnimation english={english} japanese={japanese} />
+        </h1>
+        <div className="flex items-center space-x-2">
+          {/* ドロップダウンメニュー */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="lg"
+                className="text-white hover:bg-blue-700 p-3 transition-all duration-200 ease-in-out"
+              >
+                <Menu size={24} />
+                <span className="sr-only">Menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {/* 翻訳画面への切り替え */}
+              <DropdownMenuItem
+                onClick={async () => attemptRouterPush("/translate")}
+                className="text-lg py-3 px-4 hover:bg-gray-300"
+              >
+                <ArrowRightLeft className="mr-3 h-6 w-6" />
+                <span>Translate</span>
+              </DropdownMenuItem>
+              {/* ボキャブラリー画面への切り替え */}
+              <DropdownMenuItem
+                onClick={async () => attemptRouterPush("/vocabulary")}
+                className="text-lg py-3 px-4 hover:bg-gray-300"
+              >
+                <Book className="mr-3 h-6 w-6" />
+                <span>Vocabulary</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 Header.displayName = "Header";
