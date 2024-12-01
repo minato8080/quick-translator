@@ -3,8 +3,6 @@ import React, { createContext, useContext } from "react";
 
 import { useFlashcardHandler } from "@/hooks/useFlashcardHandler";
 
-// Start Generation Here
-
 // Flashcardコンテキストの型定義
 interface FlashcardContextType {
   flashcardHandler: ReturnType<typeof useFlashcardHandler>;

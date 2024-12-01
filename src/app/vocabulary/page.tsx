@@ -31,7 +31,7 @@ const ControlArea = () => {
   const { flashcardAPI, handleDeleteAllTranslations } =
     useFlashcardContextHandler();
   const [conditionDate, setConditionDate] = useState("");
-  const { learningMode, isLearningMode, isVisibleParent, screenMode } =
+  const { learningMode, isLearningMode, isVisibleParent } =
     useSelector<RootState, RootState[typeof FLASHCARD_SLICE_NAME]>(
       (state: RootState) => state.flashcard
     );
@@ -52,7 +52,7 @@ const ControlArea = () => {
           editing: false,
         }));
       });
-  }, [conditionDate, screenMode]);
+  }, [conditionDate]);
 
   return (
     <div>
@@ -149,7 +149,6 @@ export default function Vocabulary() {
         {/* ヘッダー部分 */}
         <Header english="Vocabulary" japanese="単語帳" />
         {/* コントローラ部分 */}
-        {/* <ControlArea flashcardHandler={flashcardHandler} /> */}
         <ControlArea />
         <div
           className="p-2 pt-0 overflow-y-auto"

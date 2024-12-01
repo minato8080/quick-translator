@@ -68,9 +68,11 @@ const TriStateToggle = ({
  * @param calendar - カレンダーのデータ（オプション）
  */
 export function DatePicker({
+  date,
   setDate,
   calendar,
 }: {
+  date:string
   setDate: React.Dispatch<React.SetStateAction<string>>;
   calendar?: Calendar[];
 }) {
@@ -81,7 +83,14 @@ export function DatePicker({
   const [disabledMonth, setDisabledMonth] = useState(false);
   const [disabledDay, setDisabledDay] = useState(false);
   const [activePart, setActivePart] = useState<DatePart>("month");
+  useEffect(() => {
+    const newDate = new Date(date);
+    setYear(newDate.getFullYear());
+    setMonth(newDate.getMonth());
+    setDay(newDate.getDate());
+  }, [date]);
 
+  
   // activePartが変更されたときに、月と日の選択を無効化するかどうかを決定
   useEffect(() => {
     switch (activePart) {
@@ -263,45 +272,51 @@ export function DatePicker({
   );
 }
 
-export const DateSearchBox = React.memo(({
-  setConditionDate,
-}: {
-  setConditionDate: React.Dispatch<React.SetStateAction<string>>;
-}) => {
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toLocaleDateString()
-  );
-  const calendar = useLiveQuery(async () => {
-    const result = await db.calendar?.toArray();
+export const DateSearchBox = React.memo(
+  ({
+    setConditionDate,
+  }: {
+    setConditionDate: React.Dispatch<React.SetStateAction<string>>;
+  }) => {
+    const [selectedDate, setSelectedDate] = useState(
+      new Date().toLocaleDateString()
+    );
+    const [initialDate, setInitialDate] = useState(
+      new Date().toLocaleDateString()
+    );
+    const calendar = useLiveQuery(() => {
+      return db.calendar?.toArray().then((result) => {
+        if (result.length > 0) {
+          const latestDate = result
+            .map((entry) => entry.date)
+            .sort()
+            .reverse()[0];
+          setConditionDate(latestDate.slice(0, 7));
+          setSelectedDate(latestDate);
+          setInitialDate(latestDate);
+        }
 
-    if (result.length > 0) {
-      const latestDate = result
-        .map((entry) => entry.date)
-        .sort()
-        .reverse()[0];
-      setConditionDate(latestDate.slice(0, 7));
-      setSelectedDate(latestDate);
-    }
-
-    return result;
-  });
-  return (
-    <div className="flex mb-2">
-      {/* 日付選択コンポーネント */}
-      <DatePicker setDate={setSelectedDate} calendar={calendar} />
-      {/* 検索ボタン */}
-      <Button
-        variant="outline"
-        size="icon"
-        className="hover:bg-gray-400 ml-2"
-        onClick={() => {
-          setConditionDate(selectedDate);
-        }}
-      >
-        <Search className="h-4 w-4" />
-      </Button>
-    </div>
-  );
-});
+        return result;
+      });
+    });
+    return (
+      <div className="flex mb-2">
+        {/* 日付選択コンポーネント */}
+        <DatePicker date={initialDate} setDate={setSelectedDate} calendar={calendar} />
+        {/* 検索ボタン */}
+        <Button
+          variant="outline"
+          size="icon"
+          className="hover:bg-gray-400 ml-2"
+          onClick={() => {
+            setConditionDate(selectedDate);
+          }}
+        >
+          <Search className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  }
+);
 
 DateSearchBox.displayName = "DateSearchBox";
