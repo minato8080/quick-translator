@@ -1,8 +1,15 @@
 "use client";
 
-import { getDaysInMonth } from "date-fns";
+import { useEffect, useState } from "react";
+import React from "react";
 
-import { cn } from "@/lib/utils";
+import { getDaysInMonth } from "date-fns";
+import { parse, format } from "date-fns";
+import { useLiveQuery } from "dexie-react-hooks";
+import { Search } from "lucide-react";
+
+import { Button } from "./ui/button";
+
 import {
   Select,
   SelectContent,
@@ -10,12 +17,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar } from "@/global/dexieDB";
-import { useEffect, useState } from "react";
-import { parse, format } from "date-fns";
+import { db, type Calendar } from "@/global/dexieDB";
+import { cn } from "@/lib/utils";
 
 type DatePart = "year" | "month" | "day";
 
+/**
+ * TriStateToggleコンポーネント
+ * 年、月、日を切り替えるためのトグルUIを提供します。
+ *
+ * @param value - 現在選択されている日付の部分（year, month, day）
+ * @param onChange - 日付の部分が変更されたときに呼び出されるコールバック関数
+ */
 const TriStateToggle = ({
   value,
   onChange,
@@ -47,10 +60,19 @@ const TriStateToggle = ({
   );
 };
 
+/**
+ * DatePickerコンポーネント
+ * 日付を選択するためのUIを提供します。
+ *
+ * @param setDate - 選択された日付を設定するための関数
+ * @param calendar - カレンダーのデータ（オプション）
+ */
 export function DatePicker({
+  date,
   setDate,
   calendar,
 }: {
+  date:string
   setDate: React.Dispatch<React.SetStateAction<string>>;
   calendar?: Calendar[];
 }) {
@@ -61,7 +83,15 @@ export function DatePicker({
   const [disabledMonth, setDisabledMonth] = useState(false);
   const [disabledDay, setDisabledDay] = useState(false);
   const [activePart, setActivePart] = useState<DatePart>("month");
+  useEffect(() => {
+    const newDate = new Date(date);
+    setYear(newDate.getFullYear());
+    setMonth(newDate.getMonth());
+    setDay(newDate.getDate());
+  }, [date]);
 
+  
+  // activePartが変更されたときに、月と日の選択を無効化するかどうかを決定
   useEffect(() => {
     switch (activePart) {
       case "year":
@@ -79,6 +109,7 @@ export function DatePicker({
     }
   }, [activePart]);
 
+  // 年、月、日、または無効化状態が変更されたときに、選択された日付を更新
   useEffect(() => {
     let conditionDate = format(new Date(year, month, day), "yyyy-MM-dd");
     if (disabledDay)
@@ -87,24 +118,30 @@ export function DatePicker({
       conditionDate = conditionDate.split("-").slice(0, -1).join("-");
 
     setDate(conditionDate);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [year, month, day, disabledMonth, disabledDay]);
 
+  /**
+   * 日付の部分を更新する関数
+   *
+   * @param mode - 更新する日付の部分（year, month, day）
+   * @param newState - 新しい値
+   */
   const updateDate = (mode: DatePart, newState: number) => {
-    {
-      switch (mode) {
-        case "year":
-          setYear(newState);
-          break;
-        case "month":
-          setMonth(newState);
-          break;
-        case "day":
-          setDay(newState);
-          break;
-      }
+    switch (mode) {
+      case "year":
+        setYear(newState);
+        break;
+      case "month":
+        setMonth(newState - 1);
+        break;
+      case "day":
+        setDay(newState);
+        break;
     }
   };
 
+  // 年、月、日の選択肢を生成
   const years = Array.from(
     { length: 10 },
     (_, i) => new Date().getFullYear() - i
@@ -115,6 +152,16 @@ export function DatePicker({
     (_, i) => i + 1
   );
 
+  /**
+   * DatePickSelectboxコンポーネント
+   * 年、月、日を選択するためのセレクトボックスを提供します。
+   *
+   * @param mode - 選択する日付の部分（year, month, day）
+   * @param items - 選択肢のリスト
+   * @param disabled - セレクトボックスが無効化されているかどうか
+   * @param digit - 表示する桁数
+   * @param itemWidth - 各アイテムの幅
+   */
   const DatePickSelectbox = ({
     mode,
     items,
@@ -140,6 +187,13 @@ export function DatePicker({
         selectVal = day;
         break;
     }
+
+    /**
+     * カレンダーにデータがあるかどうかを確認する関数
+     *
+     * @param item - 確認するアイテム
+     * @returns データがある場合はtrue、ない場合はfalse
+     */
     const hasData = (item: number) => {
       if (!calendar) return false;
       return calendar.some((cal) => {
@@ -217,3 +271,52 @@ export function DatePicker({
     </div>
   );
 }
+
+export const DateSearchBox = React.memo(
+  ({
+    setConditionDate,
+  }: {
+    setConditionDate: React.Dispatch<React.SetStateAction<string>>;
+  }) => {
+    const [selectedDate, setSelectedDate] = useState(
+      new Date().toLocaleDateString()
+    );
+    const [initialDate, setInitialDate] = useState(
+      new Date().toLocaleDateString()
+    );
+    const calendar = useLiveQuery(() => {
+      return db.calendar?.toArray().then((result) => {
+        if (result.length > 0) {
+          const latestDate = result
+            .map((entry) => entry.date)
+            .sort()
+            .reverse()[0];
+          setConditionDate(latestDate.slice(0, 7));
+          setSelectedDate(latestDate);
+          setInitialDate(latestDate);
+        }
+
+        return result;
+      });
+    });
+    return (
+      <div className="flex mb-2">
+        {/* 日付選択コンポーネント */}
+        <DatePicker date={initialDate} setDate={setSelectedDate} calendar={calendar} />
+        {/* 検索ボタン */}
+        <Button
+          variant="outline"
+          size="icon"
+          className="hover:bg-gray-400 ml-2"
+          onClick={() => {
+            setConditionDate(selectedDate);
+          }}
+        >
+          <Search className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  }
+);
+
+DateSearchBox.displayName = "DateSearchBox";

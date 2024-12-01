@@ -1,38 +1,91 @@
-import { useState } from "react";
+import { useRef } from "react";
 
-import { useToast } from "@/hooks/use-toast";
-import { FlashcardType, ScreenMode, FORMAT } from "@/types/types";
-import { db } from "@/global/dexieDB";
 import { format, parse } from "date-fns";
+import { useDispatch, useSelector } from "react-redux";
+
+import type { AppDispatch, RootState } from "@/global/store";
+import type { FlashcardType, LanguagesKeys } from "@/types/types";
+
+import { db } from "@/global/dexieDB";
+import {
+  addFlashcardLeef,
+  changeFlashcardLeef,
+  changeFlashcard,
+  changeSaveInfo,
+  informSaveAll,
+  type FLASHCARD_SLICE_NAME,
+} from "@/global/flashcardSlice";
 import { TOAST_STYLE } from "@/global/style";
+import { useToast } from "@/hooks/use-toast";
+import { FORMAT } from "@/types/types";
+
+export type FlashcardAPI = {
+  flashcard: (FlashcardType & { saved: boolean; editing: boolean })[];
+};
 
 /**
  * フラッシュカードの操作を管理するカスタムフック
  * @returns フラッシュカードの状態と操作関数を含むオブジェクト
  */
-export const useFlashcardHandler = (screenMode: ScreenMode) => {
-  const [editingText, setEditingText] = useState<
-    (FlashcardType & { index: number }) | null
-  >(null);
+export const useFlashcardHandler = () => {
   const { toast } = useToast();
-  const [flashcards, setFlashcards] = useState<Array<FlashcardType>>([]);
+  
+  const { flashcard, screenMode } = useSelector<
+    RootState,
+    RootState[typeof FLASHCARD_SLICE_NAME]
+  >((state) => state.flashcard);
+
+  const dispatch = useDispatch<AppDispatch>();
+  
+  const flashcardAPI = useRef<FlashcardAPI>({
+    flashcard: [],
+  });
+
+  /**
+   * 翻訳履歴に追加する関数
+   */
+  const handleAddTranslation = (
+    inputText: string,
+    translatedText: string,
+    sourceLang: LanguagesKeys,
+    targetLang: LanguagesKeys
+  ) => {
+    flashcardAPI.current.flashcard = [
+      {
+        input: inputText,
+        output: translatedText,
+        sourceLang: sourceLang,
+        targetLang: targetLang,
+        saved: false,
+        editing: false,
+        timestamp: format(new Date(), FORMAT.TIMESTAMP),
+      },
+      ...flashcardAPI.current.flashcard,
+    ];
+    dispatch(
+      addFlashcardLeef({
+        input: inputText,
+        output: translatedText,
+        sourceLang: sourceLang,
+        targetLang: targetLang,
+        saved: false,
+        editing: false,
+        visible: true,
+        timestamp: format(new Date(), FORMAT.TIMESTAMP),
+      })
+    );
+  };
 
   /**
    * 翻訳を保存する関数
    * @param index 保存する翻訳のインデックス
    */
-  const handleSaveTranslation = async (index: number) => {
+  const handleSaveTranslation = async (
+    item: FlashcardType,
+    index: number,
+    success?: () => void
+  ) => {
     try {
-      // フラッシュカードのリストを更新するための変数を初期化
-      let updatedFlashcards = flashcards;
-      // 編集中のテキストが存在する場合、フラッシュカードのリストを更新
-      if (editingText) {
-        updatedFlashcards = flashcards.map((item, i) =>
-          i === editingText.index ? editingText : item
-        );
-      }
-      // 更新されたフラッシュカードをデータベースに保存
-      const item = updatedFlashcards[index];
       await db.vocabulary.put({
         input: item.input,
         output: item.output,
@@ -44,11 +97,7 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
       if (screenMode === "translate") {
         // タイムスタンプから日付を抽出
         const date = format(
-          parse(
-            updatedFlashcards[index].timestamp,
-            FORMAT.TIMESTAMP,
-            new Date()
-          ),
+          parse(item.timestamp, FORMAT.TIMESTAMP, new Date()),
           FORMAT.DATE
         );
 
@@ -65,16 +114,29 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
         });
       }
 
-      setFlashcards(
-        updatedFlashcards.map((item, i) =>
-          i === index ? { ...item, saved: true, editing: false } : item
-        )
-      );
       toast({
         title: "Translation Saved",
         description: "The translation has been saved.",
         style: TOAST_STYLE,
       });
+      flashcardAPI.current.flashcard[index].saved = true;
+
+      dispatch(
+        changeFlashcardLeef({
+          data: flashcardAPI.current.flashcard[index],
+          index,
+        })
+      );
+
+      if (screenMode === "translate") {
+        dispatch(
+          changeSaveInfo(
+            flashcardAPI.current.flashcard.every((p) => !p.saved || p.editing)
+          )
+        );
+      }
+
+      success?.();
     } catch (error) {
       toast({
         title: "Vocabulary Addition Error",
@@ -88,18 +150,10 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
   /**
    * すべての未保存の翻訳を保存する関数
    */
-  const handleSaveAllTranslations = async () => {
+  const handleSaveAllTranslations = async (success?: () => void) => {
     try {
-      // フラッシュカードのリストを更新するための変数を初期化
-      let updatedFlashcards = flashcards;
-      // 編集中のテキストが存在する場合、フラッシュカードのリストを更新
-      if (editingText) {
-        updatedFlashcards = flashcards.map((item, i) =>
-          i === editingText.index ? editingText : item
-        );
-      }
-      const unsavedFlashcards = updatedFlashcards
-        .filter((card) => !card.saved)
+      const unsavedFlashcard = flashcardAPI.current.flashcard
+        .filter((_card, index) => !flashcardAPI.current.flashcard[index].saved)
         .map((item) => ({
           input: item.input,
           output: item.output,
@@ -107,11 +161,11 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
           targetLang: item.targetLang,
           timestamp: item.timestamp,
         }));
-      await db.vocabulary.bulkAdd(unsavedFlashcards);
+      await db.vocabulary.bulkPut(unsavedFlashcard);
 
       const dates: string[] = Array.from(
         new Set(
-          unsavedFlashcards.map((card) =>
+          unsavedFlashcard.map((card) =>
             format(
               parse(card.timestamp, FORMAT.TIMESTAMP, new Date()),
               FORMAT.DATE
@@ -119,7 +173,7 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
           )
         )
       );
-      for (let date of dates) {
+      for (const date of dates) {
         // 同じ日付のエントリー数をカウント
         const sameDateEntries = await db.vocabulary
           .where("timestamp")
@@ -132,14 +186,18 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
           count: sameDateEntries,
         });
       }
-      setFlashcards((prev) =>
-        prev.map((item) => ({ ...item, saved: true, editing: false }))
-      );
+      flashcardAPI.current.flashcard.forEach((card) => {
+        card.saved = true;
+        card.editing = false;
+      });
+      dispatch(informSaveAll());
+      dispatch(changeFlashcard(flashcardAPI.current.flashcard));
       toast({
         title: "All Translations Saved",
         description: "All translations have been saved.",
         style: TOAST_STYLE,
       });
+      success?.();
     } catch (error) {
       toast({
         title: "Save All Error",
@@ -154,15 +212,17 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
    * 翻訳を削除する関数
    * @param index 削除する翻訳のインデックス
    */
-  const handleDeleteTranslation = async (index: number) => {
-    handleCancelEdit();
+  const handleDeleteTranslation = async (
+    index: number,
+    success?: () => void
+  ) => {
     try {
-      await db.vocabulary.delete(flashcards[index].timestamp);
+      await db.vocabulary.delete(flashcard[index].timestamp);
 
-      if (flashcards[index].saved) {
+      if (flashcardAPI.current.flashcard[index].saved) {
         // タイムスタンプから日付を抽出
         const date = format(
-          parse(flashcards[index].timestamp, FORMAT.TIMESTAMP, new Date()),
+          parse(flashcard[index].timestamp, FORMAT.TIMESTAMP, new Date()),
           FORMAT.DATE
         );
 
@@ -180,15 +240,13 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
           await db.calendar.where("date").equals(date).delete();
         }
       }
-      // vocabulary画面は自動クエリなので操作しない
-      if (screenMode !== "vocabulary")
-        setFlashcards((prev) => prev.filter((_, i) => i !== index));
 
       toast({
         title: "Translation Deleted",
         description: "The translation has been removed from database.",
         style: TOAST_STYLE,
       });
+      success?.();
     } catch (error) {
       toast({
         title: "Deletion Error",
@@ -203,7 +261,6 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
    * すべての表示中の翻訳を削除する関数
    */
   const handleDeleteAllTranslations = async (condition: string) => {
-    handleCancelEdit();
     try {
       // データベースから削除
       await db.vocabulary.where("timestamp").startsWith(condition).delete();
@@ -225,42 +282,12 @@ export const useFlashcardHandler = (screenMode: ScreenMode) => {
     }
   };
 
-  /**
-   * 翻訳を編集モードにする関数
-   * @param index 編集する翻訳のインデックス
-   */
-  const handleEditTranslation = (index: number) => {
-    handleCancelEdit();
-    setEditingText({
-      ...flashcards[index],
-      editing: true,
-      saved: false,
-      index,
-    });
-    setFlashcards((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, editing: true } : item))
-    );
-  };
-
-  /**
-   * 編集をキャンセルする関数
-   * @param index キャンセルする翻訳のインデックス
-   */
-  const handleCancelEdit = () => {
-    setFlashcards((prev) => prev.map((item) => ({ ...item, editing: false })));
-    setEditingText(null);
-  };
-
   return {
-    flashcards,
-    setFlashcards,
-    editingText,
-    setEditingText,
+    flashcardAPI,
+    handleAddTranslation,
     handleSaveAllTranslations,
     handleSaveTranslation,
     handleDeleteTranslation,
     handleDeleteAllTranslations,
-    handleEditTranslation,
-    handleCancelEdit,
   };
 };

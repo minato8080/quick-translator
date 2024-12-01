@@ -1,12 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "export",
   trailingSlash: true,
   async redirects() {
     return [
       {
-        source: "/translate",
-        destination: "/",
+        source: "/",
+        destination: "/translate",
         permanent: true,
       },
     ];

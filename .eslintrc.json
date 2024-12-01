@@ -50,5 +50,5 @@
       }
     ]
   },
-  "ignores": ["src/components/ui/*","src/hooks/use-toast.ts"]
+  "ignorePatterns": ["src/components/ui/*","src/hooks/use-toast.ts"]
 }
