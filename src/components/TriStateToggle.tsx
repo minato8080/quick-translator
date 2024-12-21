@@ -16,9 +16,8 @@ interface TriStateToggleProps<T extends string> {
   onChange: React.Dispatch<React.SetStateAction<T>>;
   labels?: readonly T[];
   disabled?: boolean;
-  width: number;
-  height: number;
   sliderJustify?: "left" | "center";
+  rootClassName?: string;
   sliderClassName?: string;
   buttonClassName?: string | ((option: T) => string);
 }
@@ -36,14 +35,18 @@ export function TriStateToggle<T extends string>({
   onChange,
   labels,
   disabled,
-  width,
-  height,
   sliderJustify = "left",
+  rootClassName,
   sliderClassName,
   buttonClassName,
 }: TriStateToggleProps<T>) {
   return (
-    <div className={`relative w-${width} h-${height} bg-gray-200 rounded-full`}>
+    <div
+      className={cn(
+        "relative w-36 h-8 bg-gray-200 rounded-full",
+        rootClassName
+      )}
+    >
       <div
         className={cn(
           "absolute top-1 bottom-1 w-1/3 rounded-full transition-all duration-200 ease-in-out",
@@ -73,7 +76,7 @@ export function TriStateToggle<T extends string>({
               : buttonClassName
           )}
           style={{ left: `${index * 33.33}%` }}
-          onClick={() => onChange(option)} 
+          onClick={() => onChange(option)}
           disabled={disabled}
         >
           {labels?.[index]}

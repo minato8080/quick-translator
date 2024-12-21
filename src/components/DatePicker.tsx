@@ -246,10 +246,9 @@ export function DatePicker({
         value={activePart}
         onChange={setActivePart}
         sliderJustify="center"
+        rootClassName="w-256 h-1"
         sliderClassName="top-1/2 -translate-y-1/2 w-3 h-3 bg-primary"
         buttonClassName="top-1/2 -translate-y-1/2 h-4"
-        width={256}
-        height={1}
       />
     </div>
   );

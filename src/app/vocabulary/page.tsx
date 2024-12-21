@@ -122,11 +122,10 @@ const ControlArea = () => {
               labels={LEARNING_MODES}
               onChange={(e) => dispatch(changeLearningMode(e))}
               disabled={!isLearningMode}
+              rootClassName="w-36 h-8"
               sliderClassName={`${
                 !isLearningMode ? "bg-blue-200" : "bg-blue-600"
               }`}
-              width={36}
-              height={8}
             />
           </div>
         </div>
