@@ -157,6 +157,18 @@ const InputTextarea = ({
   }, [handleTranslation]);
 
   /**
+   * 一定時間経過後にローダーを無効化する
+   */
+  useEffect(() => {
+    const loadingTimeout = setTimeout(() => {
+      setTranslationState((prev) => ({ ...prev, loading: false }));
+    }, 10000);
+
+    return () => clearTimeout(loadingTimeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
+
+  /**
    * Enterキーが押されたときに履歴に追加する関数
    * @param e キーボードイベント
    */
@@ -183,6 +195,7 @@ const InputTextarea = ({
         onKeyDown={handleKeyDown}
         rows={2}
         aria-label="Input text for translation"
+        autoCapitalize="off" // iOSデバイスの大文字補正を無効化
       />
       <div className="relative">
         {/* 翻訳結果の表示 */}
@@ -282,6 +295,8 @@ const InputArea = () => {
   const handleSwapLanguages = () => {
     setTranslationState((prev) => ({
       ...prev,
+      input: prev.output,
+      output: prev.input,
       sourceLang: prev.targetLang,
       targetLang: prev.sourceLang,
     }));

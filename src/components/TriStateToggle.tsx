@@ -14,16 +14,20 @@ interface TriStateToggleProps<T extends string> {
   options: readonly T[];
   value: T;
   onChange: React.Dispatch<React.SetStateAction<T>>;
-  labels?: Record<T, string>;
-  disabled: boolean;
+  labels?: readonly T[];
+  disabled?: boolean;
+  sliderJustify?: "left" | "center";
+  rootClassName?: string;
+  sliderClassName?: string;
+  buttonClassName?: string | ((option: T) => string);
 }
 
 /**
  * TriStateToggleコンポーネント
- * 
+ *
  * @template T - オプションの型
- * @param {TriStateToggleProps<T>} props - コンポーネントのプロパティ
- * @returns {JSX.Element} トグルUIをレンダリングするReactコンポーネント
+ * @param props - コンポーネントのプロパティ
+ * @returns トグルUIをレンダリングするReactコンポーネント
  */
 export function TriStateToggle<T extends string>({
   options,
@@ -31,20 +35,34 @@ export function TriStateToggle<T extends string>({
   onChange,
   labels,
   disabled,
+  sliderJustify = "left",
+  rootClassName,
+  sliderClassName,
+  buttonClassName,
 }: TriStateToggleProps<T>) {
   return (
-    <div className="relative w-36 h-8 bg-gray-200 rounded-full">
+    <div
+      className={cn(
+        "relative w-36 h-8 bg-gray-200 rounded-full",
+        rootClassName
+      )}
+    >
       <div
         className={cn(
-          `absolute top-1 bottom-1 w-1/3 rounded-full transition-all duration-200 ease-in-out ${
-            disabled ? "bg-blue-200" : "bg-blue-600"
-          }`,
-          {
-            // 現在の値に基づいてスライダーの位置を決定
-            "left-0": value === options[0],
-            "left-1/3": value === options[1],
-            "left-2/3": value === options[2],
-          }
+          "absolute top-1 bottom-1 w-1/3 rounded-full transition-all duration-200 ease-in-out",
+          !disabled && "bg-black",
+          sliderJustify === "center"
+            ? {
+                "left-[14%]": value === "year",
+                "left-[48%]": value === "month",
+                "left-[83%]": value === "day",
+              }
+            : {
+                "left-0": value === options[0],
+                "left-1/3": value === options[1],
+                "left-2/3": value === options[2],
+              },
+          sliderClassName
         )}
       />
       {options.map((option, index) => (
@@ -52,14 +70,16 @@ export function TriStateToggle<T extends string>({
           key={option}
           className={cn(
             "absolute top-0 bottom-0 w-1/3 flex items-center justify-center text-sm font-medium transition-colors duration-200",
-            // 現在選択されているオプションに応じてテキストの色を変更
-            value === option ? "text-white" : "text-gray-600"
+            value === option ? "text-white" : "text-gray-600",
+            typeof buttonClassName === "function"
+              ? buttonClassName(option)
+              : buttonClassName
           )}
-          style={{ left: `${index * 33.33}%` }} // 各ボタンの位置を設定
-          onClick={() => onChange(option)} // ボタンがクリックされたときに選択を変更
-          disabled={disabled} // トグルが無効化されている場合、ボタンを無効化
+          style={{ left: `${index * 33.33}%` }}
+          onClick={() => onChange(option)}
+          disabled={disabled}
         >
-          {labels?.[option] || option} {/* ラベルが提供されていれば表示、なければオプション名を表示 */}
+          {labels?.[index]}
         </button>
       ))}
     </div>
