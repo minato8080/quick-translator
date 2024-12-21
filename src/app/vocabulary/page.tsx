@@ -31,10 +31,10 @@ const ControlArea = () => {
   const { flashcardAPI, handleDeleteAllTranslations } =
     useFlashcardContextHandler();
   const [conditionDate, setConditionDate] = useState("");
-  const { learningMode, isLearningMode, isVisibleParent } =
-    useSelector<RootState, RootState[typeof FLASHCARD_SLICE_NAME]>(
-      (state: RootState) => state.flashcard
-    );
+  const { learningMode, isLearningMode, isVisibleParent } = useSelector<
+    RootState,
+    RootState[typeof FLASHCARD_SLICE_NAME]
+  >((state: RootState) => state.flashcard);
   const dispatch = useDispatch<AppDispatch>();
 
   useLiveQuery(() => {
@@ -119,8 +119,14 @@ const ControlArea = () => {
             <TriStateToggle
               value={!isLearningMode ? "origin" : learningMode}
               options={LEARNING_MODES}
+              labels={LEARNING_MODES}
               onChange={(e) => dispatch(changeLearningMode(e))}
               disabled={!isLearningMode}
+              sliderClassName={`${
+                !isLearningMode ? "bg-blue-200" : "bg-blue-600"
+              }`}
+              width={36}
+              height={8}
             />
           </div>
         </div>

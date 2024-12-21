@@ -8,6 +8,7 @@ import { parse, format } from "date-fns";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Search } from "lucide-react";
 
+import { TriStateToggle } from "./TriStateToggle";
 import { Button } from "./ui/button";
 
 import {
@@ -18,47 +19,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { db, type Calendar } from "@/global/dexieDB";
-import { cn } from "@/lib/utils";
 
 type DatePart = "year" | "month" | "day";
-
-/**
- * TriStateToggleコンポーネント
- * 年、月、日を切り替えるためのトグルUIを提供します。
- *
- * @param value - 現在選択されている日付の部分（year, month, day）
- * @param onChange - 日付の部分が変更されたときに呼び出されるコールバック関数
- */
-const TriStateToggle = ({
-  value,
-  onChange,
-}: {
-  value: DatePart;
-  onChange: (value: DatePart) => void;
-}) => {
-  return (
-    <div className="relative w-[256px] h-1 bg-gray-200 rounded-full">
-      <div
-        className={cn(
-          "absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-primary rounded-full transition-all duration-200 ease-in-out",
-          {
-            "left-[16.67%]": value === "year",
-            "left-[50%]": value === "month",
-            "left-[83.33%]": value === "day",
-          }
-        )}
-      />
-      {["year", "month", "day"].map((part, index) => (
-        <button
-          key={part}
-          className="absolute top-1/2 -translate-y-1/2 w-1/3 h-4 flex items-center justify-center"
-          style={{ left: `${index * 33.33}%` }}
-          onClick={() => onChange(part as DatePart)}
-        />
-      ))}
-    </div>
-  );
-};
 
 /**
  * DatePickerコンポーネント
@@ -72,7 +34,7 @@ export function DatePicker({
   setDate,
   calendar,
 }: {
-  date:string
+  date: string;
   setDate: React.Dispatch<React.SetStateAction<string>>;
   calendar?: Calendar[];
 }) {
@@ -90,7 +52,6 @@ export function DatePicker({
     setDay(newDate.getDate());
   }, [date]);
 
-  
   // activePartが変更されたときに、月と日の選択を無効化するかどうかを決定
   useEffect(() => {
     switch (activePart) {
@@ -217,9 +178,22 @@ export function DatePicker({
       <Select
         value={selectVal.toString()}
         onValueChange={(value) => updateDate(mode, parseInt(value))}
-        disabled={disabled}
+        onOpenChange={() => {
+          switch (mode) {
+            case "year":
+              break;
+            case "month":
+              if (activePart === "year") setActivePart(mode);
+            case "day":
+              if (["year", "month"].some((p) => p === activePart))
+                setActivePart(mode);
+              break;
+            default:
+              break;
+          }
+        }}
       >
-        <SelectTrigger className="w-[80px]">
+        <SelectTrigger className={`w-[80px] ${disabled && "text-gray-200"}`}>
           <SelectValue>{selectVal.toString().padStart(digit, "0")}</SelectValue>
         </SelectTrigger>
         <SelectContent>
@@ -267,7 +241,16 @@ export function DatePicker({
           itemWidth={50}
         />
       </div>
-      <TriStateToggle value={activePart} onChange={setActivePart} />
+      <TriStateToggle
+        options={["year", "month", "day"]}
+        value={activePart}
+        onChange={setActivePart}
+        sliderJustify="center"
+        sliderClassName="top-1/2 -translate-y-1/2 w-3 h-3 bg-primary"
+        buttonClassName="top-1/2 -translate-y-1/2 h-4"
+        width={256}
+        height={1}
+      />
     </div>
   );
 }
@@ -302,7 +285,11 @@ export const DateSearchBox = React.memo(
     return (
       <div className="flex mb-2">
         {/* 日付選択コンポーネント */}
-        <DatePicker date={initialDate} setDate={setSelectedDate} calendar={calendar} />
+        <DatePicker
+          date={initialDate}
+          setDate={setSelectedDate}
+          calendar={calendar}
+        />
         {/* 検索ボタン */}
         <Button
           variant="outline"

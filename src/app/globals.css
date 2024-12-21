@@ -84,4 +84,7 @@ body {
   .textarea {
     @apply flex-grow p-2 text-base rounded-md border border-gray-200 resize-none;
   }
+  .textarea:disabled {
+    opacity: 1 !important;/* iPhone環境で透明度を上書きされるのを阻害 */
+  }
 }
