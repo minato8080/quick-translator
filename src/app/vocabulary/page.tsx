@@ -117,15 +117,13 @@ const ControlArea = () => {
               />
             </div>
             <TriStateToggle
-              value={!isLearningMode ? "origin" : learningMode}
+              value={isLearningMode ? learningMode : "origin"}
               options={LEARNING_MODES}
               labels={LEARNING_MODES}
               onChange={(e) => dispatch(changeLearningMode(e))}
               disabled={!isLearningMode}
               rootClassName="w-36 h-8"
-              sliderClassName={`${
-                !isLearningMode ? "bg-blue-200" : "bg-blue-600"
-              }`}
+              sliderClassName="bg-blue-600"
             />
           </div>
         </div>
