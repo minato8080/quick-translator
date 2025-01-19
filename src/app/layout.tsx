@@ -27,9 +27,34 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // サービスワーカーの登録
+  if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service_worker.js').then((registration) => {
+      console.log('ServiceWorker registration successful with scope: ', registration.scope);
+    }).catch((err) => {
+      console.error('ServiceWorker registration failed: ', err);
+    });
+  }
   return (
     <html lang="en">
       <head>
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/apple-touch-icon.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon-32x32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/favicon-16x16.png"
+        />
         {/*iOS用*/}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         {/*Android用*/}
@@ -40,7 +65,7 @@ export default function RootLayout({
       >
         <main>
           <Providers>{children}</Providers>
-        </main>
+          </main>
       </body>
     </html>
   );
