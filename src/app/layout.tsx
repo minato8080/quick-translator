@@ -29,6 +29,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {/*iOS用*/}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        {/*Android用*/}
+        <meta name="mobile-web-app-capable" content="yes" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden`}
       >
