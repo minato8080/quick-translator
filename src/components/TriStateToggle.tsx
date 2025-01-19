@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 import { cn } from "@/lib/utils";
 
 /**
@@ -16,7 +18,7 @@ interface TriStateToggleProps<T extends string> {
   onChange: React.Dispatch<React.SetStateAction<T>>;
   labels?: readonly T[];
   disabled?: boolean;
-  sliderJustify?: "left" | "center";
+  sliderStyle?: CSSProperties;
   rootClassName?: string;
   sliderClassName?: string;
   buttonClassName?: string | ((option: T) => string);
@@ -35,7 +37,7 @@ export function TriStateToggle<T extends string>({
   onChange,
   labels,
   disabled,
-  sliderJustify = "left",
+  sliderStyle,
   rootClassName,
   sliderClassName,
   buttonClassName,
@@ -49,21 +51,16 @@ export function TriStateToggle<T extends string>({
     >
       <div
         className={cn(
-          "absolute top-1 bottom-1 w-1/3 rounded-full transition-all duration-200 ease-in-out",
-          !disabled && "bg-black",
-          sliderJustify === "center"
-            ? {
-                "left-[14%]": value === "year",
-                "left-[48%]": value === "month",
-                "left-[83%]": value === "day",
-              }
-            : {
-                "left-0": value === options[0],
-                "left-1/3": value === options[1],
-                "left-2/3": value === options[2],
-              },
+          "absolute top-1 bottom-1 w-1/3 rounded-full transition-all duration-200 ease-in-out bg-black",
+          disabled && "opacity-50",
+          {
+            "left-0": value === options[0],
+            "left-1/3": value === options[1],
+            "left-2/3": value === options[2],
+          },
           sliderClassName
         )}
+        style={sliderStyle}
       />
       {options.map((option, index) => (
         <button

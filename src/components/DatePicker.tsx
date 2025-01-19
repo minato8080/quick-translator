@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { db, type Calendar } from "@/global/dexieDB";
+import { cn } from "@/lib/utils";
 
 type DatePart = "year" | "month" | "day";
 
@@ -26,8 +27,9 @@ type DatePart = "year" | "month" | "day";
  * DatePickerコンポーネント
  * 日付を選択するためのUIを提供します。
  *
+ * @param date - 選択された日付
  * @param setDate - 選択された日付を設定するための関数
- * @param calendar - カレンダーのデータ（オプション）
+ * @param calendar - カレンダーのデータ
  */
 export function DatePicker({
   date,
@@ -193,7 +195,7 @@ export function DatePicker({
           }
         }}
       >
-        <SelectTrigger className={`w-[80px] ${disabled && "text-gray-200"}`}>
+        <SelectTrigger className={cn("w-[80px]", disabled && "text-gray-200")}>
           <SelectValue>{selectVal.toString().padStart(digit, "0")}</SelectValue>
         </SelectTrigger>
         <SelectContent>
@@ -245,10 +247,10 @@ export function DatePicker({
         options={["year", "month", "day"]}
         value={activePart}
         onChange={setActivePart}
-        sliderJustify="center"
-        rootClassName="w-256 h-1"
-        sliderClassName="top-1/2 -translate-y-1/2 w-3 h-3 bg-primary"
-        buttonClassName="top-1/2 -translate-y-1/2 h-4"
+        rootClassName="w-256 h-2"
+        sliderClassName="top-1/2 -translate-y-1/2 w-3 h-3"
+        sliderStyle={{ marginLeft: "15%" }}
+        buttonClassName="top-1/2 h-4"
       />
     </div>
   );
