@@ -100,13 +100,6 @@ export const Header = React.memo(
     routerPushableRef?: React.MutableRefObject<boolean>;
     children: React.ReactNode;
   }) => {
-    const [mounted, setMounted] = useState(false);
-
-    // クライアント側でのみ `BrowserRouter` を表示
-    useEffect(() => {
-      setMounted(true);
-    }, []);
-
     const quickControls = useAnimation();
     useEffect(() => {
       (async () => {
@@ -125,11 +118,6 @@ export const Header = React.memo(
         }
       })();
     }, [quickControls, routerPushableRef]);
-
-    // Hydration エラーを防ぐため、初回レンダリングでは何も描画しない
-    if (!mounted) {
-      return null;
-    }
 
     return (
       <div className="bg-blue-600 text-white p-2 pr-4 pl-4 flex justify-between items-center">

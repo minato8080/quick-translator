@@ -34,14 +34,14 @@ export const SSGHeader = React.memo(
       >
         <DropdownMenuItem
           className="text-lg py-3 px-4 hover:bg-gray-300"
-          onClick={async () => attemptRouterPush("translate")}
+          onClick={async () => attemptRouterPush("/translate")}
         >
           <ArrowRightLeft className="mr-3 h-6 w-6" />
           <span>Translate</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           className="text-lg py-3 px-4 hover:bg-gray-300"
-          onClick={async () => attemptRouterPush("vocabulary")}
+          onClick={async () => attemptRouterPush("/vocabulary")}
         >
           <Book className="mr-3 h-6 w-6" />
           <span>Vocabulary</span>
