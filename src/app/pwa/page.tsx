@@ -7,7 +7,7 @@ import SPAHeader from "@/components/SPAHeader";
 import Translate from "@/components/page/Translate";
 import Vocabulary from "@/components/page/Vocabulary";
 
-export const SPARouter = () => {
+const PWARouter = () => {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -35,4 +35,4 @@ export const SPARouter = () => {
     </Router>
   );
 };
-export default SPARouter;
+export default PWARouter;
