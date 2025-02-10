@@ -28,16 +28,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   // サービスワーカーの登録
-  if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service_worker.js').then((registration) => {
-      console.log('ServiceWorker registration successful with scope: ', registration.scope);
-    }).catch((err) => {
-      console.error('ServiceWorker registration failed: ', err);
-    });
+  if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+    navigator.serviceWorker
+      .register("service_worker.js")
+      .then((registration) => {
+        console.log(
+          "ServiceWorker registration successful with scope: ",
+          registration.scope
+        );
+      })
+      .catch((err) => {
+        console.error("ServiceWorker registration failed: ", err);
+      });
   }
   return (
     <html lang="en">
       <head>
+        <link rel="manifest" href="/site.webmanifest" />
         <link
           rel="apple-touch-icon"
           sizes="180x180"
@@ -65,7 +72,7 @@ export default function RootLayout({
       >
         <main>
           <Providers>{children}</Providers>
-          </main>
+        </main>
       </body>
     </html>
   );

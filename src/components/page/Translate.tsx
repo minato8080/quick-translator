@@ -414,7 +414,7 @@ export default function Translate({ Header }: { Header: HeaderComponentType }) {
   return (
     <div className="min-h-screen bg-blue-50 flex flex-col items-center">
       {/* メインのカードコンテナ */}
-      <div className="w-full max-w-3xl bg-white rounded-lg shadow-xl overflow-hidden fixed">
+      <div className="w-full max-w-3xl bg-white shadow-xl overflow-hidden fixed">
         <Header english="Translator" japanese="翻訳" />
         {/* メインコンテンツ部分 */}
         <div

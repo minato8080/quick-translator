@@ -148,7 +148,7 @@ export default function Vocabulary({ Header }: { Header: HeaderComponentType }) 
   return (
     <div className="min-h-screen bg-blue-50 flex flex-col items-center">
       {/* メインのカードコンテナ */}
-      <div className="w-full max-w-3xl bg-white rounded-lg shadow-xl overflow-hidden fixed">
+      <div className="w-full max-w-3xl bg-white shadow-xl overflow-hidden fixed">
         {/* ヘッダー部分 */}
         <Header english="Vocabulary" japanese="単語帳" />
         {/* コントローラ部分 */}
