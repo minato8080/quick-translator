@@ -8,6 +8,12 @@ const nextConfig = {
         destination: "/translate",
         permanent: true,
       },
+      {
+        source: "/pwa/:path*",
+        has: [{ type: "query", key: "redirect", value: "false", negate: true }],
+        destination: "/pwa",
+        permanent: true,
+      },
     ];
   },
 };

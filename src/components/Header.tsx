@@ -1,17 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import React from "react";
 
 import { motion, useAnimation } from "framer-motion";
-import { ArrowRightLeft, Menu, Book } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Menu } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -82,6 +80,7 @@ const TranslateAnimation = ({
     </span>
   );
 };
+
 /**
  * ヘッダーコンポーネント
  *
@@ -90,11 +89,25 @@ const TranslateAnimation = ({
  * @returns ヘッダーUIをレンダリングするReactコンポーネント
  */
 export const Header = React.memo(
-  ({ english, japanese }: { english: string; japanese: string }) => {
-    const router = useRouter();
-    const quickControls = useAnimation();
-    const routerPushableRef = useRef(false);
+  ({
+    english,
+    japanese,
+    routerPushableRef,
+    children,
+  }: {
+    english: string;
+    japanese: string;
+    routerPushableRef?: React.MutableRefObject<boolean>;
+    children: React.ReactNode;
+  }) => {
+    const [mounted, setMounted] = useState(false);
 
+    // クライアント側でのみ `BrowserRouter` を表示
+    useEffect(() => {
+      setMounted(true);
+    }, []);
+
+    const quickControls = useAnimation();
     useEffect(() => {
       (async () => {
         await quickControls.start({
@@ -107,21 +120,15 @@ export const Header = React.memo(
         });
         // レンダリングの完了を待ってからrouterを有効にする
         await new Promise((resolve) => setTimeout(resolve, 3000));
-        routerPushableRef.current = true;
+        if (routerPushableRef) {
+          routerPushableRef.current = true;
+        }
       })();
-    }, [quickControls]);
+    }, [quickControls, routerPushableRef]);
 
-    async function attemptRouterPush(path: string) {
-      let maxAttempts = 30;
-      const delay = 100;
-
-      while (!routerPushableRef.current && maxAttempts > 0) {
-        await new Promise((resolve) => setTimeout(resolve, delay));
-        maxAttempts--;
-      }
-      if (routerPushableRef.current) {
-        router.push(path);
-      }
+    // Hydration エラーを防ぐため、初回レンダリングでは何も描画しない
+    if (!mounted) {
+      return null;
     }
 
     return (
@@ -146,24 +153,7 @@ export const Header = React.memo(
                 <span className="sr-only">Menu</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {/* 翻訳画面への切り替え */}
-              <DropdownMenuItem
-                onClick={async () => attemptRouterPush("/translate")}
-                className="text-lg py-3 px-4 hover:bg-gray-300"
-              >
-                <ArrowRightLeft className="mr-3 h-6 w-6" />
-                <span>Translate</span>
-              </DropdownMenuItem>
-              {/* ボキャブラリー画面への切り替え */}
-              <DropdownMenuItem
-                onClick={async () => attemptRouterPush("/vocabulary")}
-                className="text-lg py-3 px-4 hover:bg-gray-300"
-              >
-                <Book className="mr-3 h-6 w-6" />
-                <span>Vocabulary</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
+            <DropdownMenuContent align="end">{children}</DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>

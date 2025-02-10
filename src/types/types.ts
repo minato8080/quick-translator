@@ -1,3 +1,5 @@
+import type React from "react";
+
 import type { SourceLanguageCode, TargetLanguageCode } from "deepl-node";
 
 /**
@@ -83,3 +85,8 @@ export const LEARNING_MODES = ["origin", "en-ja", "ja-en"] as const;
  * 学習モードの型
  */
 export type LearningMode = (typeof LEARNING_MODES)[number];
+
+export type HeaderComponentType = React.ComponentType<{
+  english: string;
+  japanese: string;
+}>;
