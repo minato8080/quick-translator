@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import type { NextRequest } from 'next/server'
+import type { NextRequest } from "next/server";
 
 export function middleware(_request: NextRequest) {
   const res = NextResponse.next();
@@ -9,5 +9,5 @@ export function middleware(_request: NextRequest) {
 }
 
 export const config = {
-  matcher: "/pwa/:path*",
+  matcher: ["/pwa/:path*", "/favicon.ico"],
 };
