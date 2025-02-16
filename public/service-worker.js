@@ -3,8 +3,8 @@ const CACHE_NAME = "pwa-sample-caches";
 const ORIGIN = self.location.origin;
 const CACHE_URL = [
   `${ORIGIN}/pwa/`,
-  `${ORIGIN}/pwa/translate`,
-  `${ORIGIN}/pwa/vocabulary`,
+  `${ORIGIN}/pwa/translate/`,
+  `${ORIGIN}/pwa/vocabulary/`,
   `${ORIGIN}/favicon.ico`,
 ];
 
