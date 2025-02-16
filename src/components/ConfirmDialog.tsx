@@ -1,5 +1,3 @@
-"use client";
-
 import type { RefAttributes } from "react";
 import { cloneElement } from "react";
 

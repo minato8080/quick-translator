@@ -17,20 +17,14 @@ export const SPAHeader = React.memo(
       <Header english={english} japanese={japanese}>
         <DropdownMenuItem
           className="text-lg py-3 px-4 hover:bg-gray-300"
-          onClick={() => {
-            navigate("/pwa/translate", { replace: true });
-            window.history.replaceState(null, "", "/pwa/");
-          }}
+          onClick={() => navigate("/pwa/translate/")}
         >
           <ArrowRightLeft className="mr-3 h-6 w-6" />
           <span>Translate</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           className="text-lg py-3 px-4 hover:bg-gray-300"
-          onClick={() => {
-            navigate("/pwa/vocabulary", { replace: true });
-            window.history.replaceState(null, "", "/pwa/");
-          }}
+          onClick={() => navigate("/pwa/vocabulary/")}
         >
           <Book className="mr-3 h-6 w-6" />
           <span>Vocabulary</span>

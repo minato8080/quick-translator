@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 
+import { RedirectComponent } from "@/components/RedirectComponent";
 import SPAHeader from "@/components/SPAHeader";
 import Translate from "@/components/page/Translate";
 import Vocabulary from "@/components/page/Vocabulary";
@@ -13,7 +14,7 @@ const PWARouter = () => {
   useEffect(() => {
     setMounted(true);
   }, []);
-  
+
   // Hydration エラーを防ぐため、初回レンダリングでは何も描画しない
   if (!mounted) {
     return null;
@@ -22,13 +23,16 @@ const PWARouter = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/pwa" element={<Translate Header={SPAHeader} />} />
         <Route
-          path="/pwa/translate"
+          path="/pwa/"
+          element={<RedirectComponent to="/pwa/translate" />}
+        />
+        <Route
+          path="/pwa/translate/"
           element={<Translate Header={SPAHeader} />}
         />
         <Route
-          path="/pwa/vocabulary"
+          path="/pwa/vocabulary/"
           element={<Vocabulary Header={SPAHeader} />}
         />
       </Routes>
