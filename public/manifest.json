@@ -1,6 +1,6 @@
 {
-  "name": "",
-  "short_name": "",
+  "name": "quick-translator",
+  "short_name": "quick-translator",
   "start_url": "/pwa", 
   "icons": [
     {

@@ -31,11 +31,6 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link
-          rel="manifest"
-          href="/site.webmanifest"
-          crossOrigin="use-credentials"
-        />
-        <link
           rel="apple-touch-icon"
           sizes="180x180"
           href="/apple-touch-icon.png"
