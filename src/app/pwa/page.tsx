@@ -25,7 +25,7 @@ const PWARouter = () => {
       <Routes>
         <Route
           path="/pwa/"
-          element={<RedirectComponent to="/pwa/translate" />}
+          element={<RedirectComponent to="/pwa/translate/" />}
         />
         <Route
           path="/pwa/translate/"
