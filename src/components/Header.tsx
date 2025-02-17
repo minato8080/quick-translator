@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import React from "react";
 
 import { motion, useAnimation } from "framer-motion";
-import { Menu } from "lucide-react";
+import { ArrowRightLeft, Book, Menu } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -93,12 +94,12 @@ export const Header = React.memo(
     english,
     japanese,
     routerPushableRef,
-    children,
+    routeFunction,
   }: {
     english: string;
     japanese: string;
     routerPushableRef?: React.MutableRefObject<boolean>;
-    children: React.ReactNode;
+    routeFunction: (url: string) => Promise<void> | void;
   }) => {
     const quickControls = useAnimation();
     useEffect(() => {
@@ -141,7 +142,22 @@ export const Header = React.memo(
                 <span className="sr-only">Menu</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">{children}</DropdownMenuContent>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                className="text-lg py-3 px-4 hover:bg-gray-300"
+                onClick={async () => routeFunction("/translate")}
+              >
+                <ArrowRightLeft className="mr-3 h-6 w-6" />
+                <span>Translate</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-lg py-3 px-4 hover:bg-gray-300"
+                onClick={async () => routeFunction("/vocabulary")}
+              >
+                <Book className="mr-3 h-6 w-6" />
+                <span>Vocabulary</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
