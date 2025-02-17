@@ -9,5 +9,5 @@ export function middleware(_request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/pwa/:path*", "/favicon.ico", "/manifest.json"],
+  matcher: ["/pwa/:path*", "/favicon.ico"],
 };

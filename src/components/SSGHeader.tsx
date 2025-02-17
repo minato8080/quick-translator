@@ -2,9 +2,11 @@
 
 import React, { useRef } from "react";
 
+import { ArrowRightLeft, Book } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { Header } from "./Header";
+import { DropdownMenuItem } from "./ui/dropdown-menu";
 
 export const SSGHeader = ({
   english,
@@ -16,8 +18,7 @@ export const SSGHeader = ({
   const router = useRouter();
   const routerPushableRef = useRef(false);
 
-  // アニメーションの描画完了後にルーティングする
-  async function delayRoute(path: string) {
+  async function attemptRouterPush(path: string) {
     let maxAttempts = 30;
     const delay = 100;
 
@@ -31,7 +32,26 @@ export const SSGHeader = ({
   }
 
   return (
-    <Header english={english} japanese={japanese} routeFunction={delayRoute} />
+    <Header
+      english={english}
+      japanese={japanese}
+      routerPushableRef={routerPushableRef}
+    >
+      <DropdownMenuItem
+        className="text-lg py-3 px-4 hover:bg-gray-300"
+        onClick={async () => attemptRouterPush("/translate")}
+      >
+        <ArrowRightLeft className="mr-3 h-6 w-6" />
+        <span>Translate</span>
+      </DropdownMenuItem>
+      <DropdownMenuItem
+        className="text-lg py-3 px-4 hover:bg-gray-300"
+        onClick={async () => attemptRouterPush("/vocabulary")}
+      >
+        <Book className="mr-3 h-6 w-6" />
+        <span>Vocabulary</span>
+      </DropdownMenuItem>
+    </Header>
   );
 };
 
